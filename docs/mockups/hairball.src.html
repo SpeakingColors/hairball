@@ -52,6 +52,8 @@ button.on.blue { background: #6cc9f522; border-color: var(--blue); }
 .seg { display: flex; gap: 0; } .seg button { border-radius: 0; flex: 1; padding: 6px 4px; font-size: 12px; margin-left: -1px; } .seg button:first-child { border-radius: 3px 0 0 3px; margin: 0; } .seg button:last-child { border-radius: 0 3px 3px 0; }
 .seg button.on { position: relative; z-index: 1; }
 .transport { display: grid; gap: 8px; align-content: start; }
+.playbtn { width: 100%; border-color: var(--green); background: #02ebba1a; font-size: 14px; padding: 8px; }
+.playbtn.on { background: var(--green); color: #04110e; border-color: var(--green); }
 .transport .two { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
 select { font: inherit; font-size: 13px; background: #0a0a0c; color: var(--ink); border: 1px solid var(--line); border-radius: 3px; padding: 6px; width: 100%; letter-spacing: .02em; }
 .dispwrap { position: relative; padding: 0; overflow: hidden; }
@@ -76,6 +78,7 @@ canvas { display: block; width: 100%; }
 .sec.side .inner .knobs { flex: 1 1 auto; min-width: 0; }
 .sec.side .inner .gfx { flex: none; }
 .sec .gfx { margin-top: 8px; width: 100%; border: 1px solid var(--line); border-radius: 3px; background: #0a0a0c; }
+#pg-riser { grid-template-columns: 440px minmax(0,1fr); } #pg-riser > * { grid-column: auto; } #pg-thicken .knobwrap { width: 72px; } #pg-riser .knobwrap { width: 66px; }
 #pg-grains { grid-template-columns: 430px 270px minmax(0,1fr); }
 #pg-grains .sec { grid-column: auto; }
 #pg-grains .sec[data-sec=Time] { grid-column: 1 / -1; }
@@ -85,6 +88,7 @@ canvas { display: block; width: 100%; }
 .sec .choicerow { flex: 1 1 100%; }
 .sec[data-sec=Time] .choicerow { flex: 1 1 420px; }
 .sec.side .gfx { margin-top: 0; }
+.sec.filt .knobs { }
 .sec .note { font-size: 12px; color: var(--ink-dim); margin-top: 6px; letter-spacing: .02em; }
 .c12 { grid-column: span 12; } .c8 { grid-column: span 8; } .c7 { grid-column: span 7; } .c6 { grid-column: span 6; } .c5 { grid-column: span 5; } .c4 { grid-column: span 4; } .c3 { grid-column: span 3; }
 .knobwrap { width: 78px; display: grid; justify-items: center; gap: 1px; }
@@ -156,6 +160,7 @@ footer { display: flex; justify-content: space-between; gap: 12px; flex-wrap: wr
         <div class="seg" id="modeSeg"><button data-v="0">Instrument</button><button data-v="1">FX</button></div>
         <select id="srcSel" aria-label="Audio source" data-tip="Instrument: the sound you play with the keys. FX: the audio that passes through the track. In the plugin FX listens to the track; here you pick a loop or drop a file."><option value="demo">Demo: house loop</option><option value="pad">Demo: pad chords</option><option value="file" hidden>Dropped file</option><option value="mic">Microphone</option></select>
         <div class="two"><button id="bFreeze" data-tip="FX: stop recording and loop what is in the buffer. Grains then play only the frozen audio.">Freeze</button><button id="bHold" data-tip="Holds the playing position still. Click to latch, or press and hold for a stutter.">Hold</button></div>
+        <button id="bPlay" class="playbtn" data-tip="Instrument: plays the sound at its root key and keeps playing until you press again. You can also click the piano keys. FX: the loop plays by itself.">&#9654; Play</button>
         <div class="two"><button id="bRise" data-tip="Starts the riser: grains shrink, get closer and fuse into a pitched tone while pitch and filter climb.">Riser</button><button id="bCap" data-tip="FX: record what the buffer holds into Hairball as a small sample and switch to Instrument to play it.">Capture</button></div>
         <div class="hint" id="srcHint"></div>
       </div>
@@ -315,7 +320,7 @@ function makeChoice(d, group) {
 function addCtl(host, id, group) { const d = BYID[id]; host.appendChild(d.choice ? makeChoice(d, group) : makeKnob(d, group)); }
 function setParam(id, v) { const d = BYID[id]; v = clamp(v, d.lo, d.hi); if (P[id] === v) return; P[id] = v; if (els[id]) els[id].draw(); onParam(id); markEdited(); }
 function onParam(id) {
-  if (id === 'mode') { if (eng) eng.allNotesOff(); updateGate(); syncTransport(); if (P.mode >= .5 && eng) { const v = eng.voices[0]; v.on = true; } if (state.bufName === 'mic' && P.mode < .5) {} }
+  if (id === 'mode') { if (typeof setPlaying === 'function') { playing = null; $('#bPlay').classList.remove('on'); $('#bPlay').innerHTML = '&#9654; Play'; } if (eng) eng.allNotesOff(); updateGate(); syncTransport(); if (P.mode >= .5 && eng) { const v = eng.voices[0]; v.on = true; } if (state.bufName === 'mic' && P.mode < .5) {} }
   if (id === 'freeze' || id === 'hold' || id === 'riseOn') syncTransport();
   if (id === 'nasty') for (const k of ['drive', 'transistor', 'fuzz']) { if (P.nasty < .5 && P[k] > 100) setParam(k, 100); }
   if (id === 'transMode') drawMainSoon();
@@ -331,22 +336,22 @@ const PAGES = {
     { n: 'Time', c: 'c12', ids: ['loop', 'keyTo', 'start', 'root'], note: 'Key to: Percent, Step and Transient use the keys from C5 up (green marks appear on the piano).' }],
   riser: [
     { n: 'Pitch', c: 'c6', col: 'L', ids: ['pitch', 'fine', 'pitchEnv', 'pitchEnvT', 'pitchEnvC', 'glide'], gfx: 'penv' },
-    { n: 'Amp', c: 'c6', col: 'L', ids: ['ampA', 'ampD', 'ampS', 'ampR', 'voices'], cls: 'amp', note: 'Instrument mode only. In FX mode the sound plays all the time.' },
+    { n: 'Amp', c: 'c6', col: 'L', ids: ['ampA', 'ampD', 'ampS', 'ampR', 'voices'], cls: 'amp' },
     { n: 'Riser', c: 'c6', ids: ['riseOn', 'riseKey', 'riseTime', 'riseCurve', 'risePitch', 'riseGrain', 'riseTone', 'riseHz', 'riseFilter'], gfx: 'rise' }],
   thicken: [
     { n: 'Thicken', c: 'c7', ids: ['width', 'bassMono', 'lowG', 'midG', 'midF', 'midQ', 'highG'] },
     { n: 'Filter', c: 'c5', ids: ['filtType', 'cutoff', 'reso'], cls: 'filt' },
-    { n: 'Response', c: 'c12', ids: [], gfx: 'resp', note: 'Blue: EQ and filter together. Pink dashed: where the filter ends up when the riser is done.' },
-    { n: 'Colour', c: 'c8', ids: ['drive', 'transistor', 'fuzz'], gfx: 'xfer', side: true, note: 'Same three stages as PurrOne. Above 100 % needs Nasty range (right side).' },
-    { n: 'Dance', c: 'c4', ids: ['dance'], gfx: 'gr', side: true, note: 'Compressor on everything above 150 Hz. Bass stays untouched.' }]
+    { n: 'Response', c: 'c4', ids: [], gfx: 'resp' },
+    { n: 'Colour', c: 'c5', ids: ['drive', 'transistor', 'fuzz'], gfx: 'xfer', side: true },
+    { n: 'Dance', c: 'c3', ids: ['dance'], gfx: 'gr', side: true }]
 };
-const GFXH = { gshape: 78, lfo: 70, penv: 96, rise: 120, resp: 118, xfer: 130, gr: 120 };
+const GFXH = { gshape: 78, lfo: 70, penv: 70, rise: 100, resp: 104, xfer: 104, gr: 104 };
 function mkSec(sp) {
   const s = document.createElement('div'); s.className = 'sec ' + sp.c + (sp.cls ? ' ' + sp.cls : '') + (sp.side ? ' side' : ''); s.dataset.sec = sp.n; s.innerHTML = `<h3>${sp.n}</h3><div class="inner"><div class="knobs"></div></div>`;
   const k = $('.knobs', s), inner = $('.inner', s), chs = sp.ids.filter(i => BYID[i].choice), nk = sp.ids.filter(i => !BYID[i].choice);
   if (chs.length) { const row = document.createElement('div'); row.className = 'choicerow'; chs.forEach(i => addCtl(row, i, sp.n)); k.appendChild(row); } nk.forEach(i => addCtl(k, i, sp.n));
   if (!sp.ids.length) $('.knobs', s).remove();
-  if (sp.gfx) { const c = document.createElement('canvas'); c.className = 'gfx g-' + sp.gfx; c.id = 'g-' + sp.gfx; c.style.height = GFXH[sp.gfx] + 'px'; if (sp.side) c.style.width = (sp.gfx === 'xfer' ? 130 : 150) + 'px'; inner.appendChild(c); }
+  if (sp.gfx) { const c = document.createElement('canvas'); c.className = 'gfx g-' + sp.gfx; c.id = 'g-' + sp.gfx; c.style.height = GFXH[sp.gfx] + 'px'; if (sp.side) c.style.width = (sp.gfx === 'xfer' ? 104 : 100) + 'px'; inner.appendChild(c); }
   if (sp.note) { const n = document.createElement('div'); n.className = 'note'; n.textContent = sp.note; s.appendChild(n); } return s;
 }
 function build() {
@@ -386,7 +391,9 @@ $('#bHold').addEventListener('pointerdown', () => { holdDown = performance.now()
 $('#bHold').addEventListener('pointerup', () => { if (!holdWasOn && performance.now() - holdDown > 300) setParam('hold', 0); }); $('#bHold').addEventListener('pointerleave', () => { if (!holdWasOn && P.hold >= .5 && holdDown && performance.now() - holdDown > 300) setParam('hold', 0); holdDown = 0; });
 $('#bCap').addEventListener('click', () => { if (!eng) return; eng.captureToSample(); state.buf = { l: eng.smp.l, r: eng.smp.r, sr: ctx ? ctx.sampleRate : SR_FALLBACK }; setParam('freeze', 0); setParam('mode', 0); $('#srcHint').textContent = 'Captured ' + (eng.smp.n / eng.sr).toFixed(1) + ' s. Play it with the keys.'; drawMainSoon(); });
 $('#srcSel').addEventListener('change', e => { const v = e.target.value; if (v === 'mic') pickMic(); else { try { if (micNode) micNode.disconnect(); } catch (er) {} micNode = null; useBuffer(v); $('#srcHint').textContent = ''; } });
-$('#bStart').addEventListener('click', powerOn); $('#power').addEventListener('click', () => state.audioOn ? powerOff() : powerOn());
+let playing = null; function setPlaying(on) { if (on && P.mode < .5) { playing = Math.round(P.root); keyOn(playing); } else if (playing !== null) { keyOff(playing); playing = null; } $('#bPlay').classList.toggle('on', !!playing); $('#bPlay').innerHTML = playing ? '&#9632; Stop' : '&#9654; Play'; }
+$('#bPlay').addEventListener('click', () => { if (P.mode >= .5) { powerOn(); return; } setPlaying(!playing); });
+$('#bStart').addEventListener('click', async () => { await powerOn(); if (P.mode < .5 && !playing) setPlaying(true); }); $('#power').addEventListener('click', () => state.audioOn ? powerOff() : powerOn());
 const dw = $('#dispwrap'); ['dragenter', 'dragover'].forEach(t => dw.addEventListener(t, e => { e.preventDefault(); dw.classList.add('hot'); })); ['dragleave', 'drop'].forEach(t => dw.addEventListener(t, e => { e.preventDefault(); dw.classList.remove('hot'); }));
 dw.addEventListener('drop', e => { const f = e.dataTransfer.files && e.dataTransfer.files[0]; if (f) { setParam('mode', 0); loadFile(f); } });
 $('#main').addEventListener('pointerdown', e => { if (P.mode >= .5) return; const r = e.target.getBoundingClientRect(); setParam('start', clamp((e.clientX - r.left) / r.width * 100, 0, 99)); });
@@ -499,8 +506,8 @@ function drawMeter() {
   const c = $('#meter'); const { g, w, h } = prep(c); g.clearRect(0, 0, w, h); const bw = 14, x1 = 30, x2 = 50; g.fillStyle = '#0a0a0c'; g.fillRect(x1, 2, bw, h - 17); g.fillRect(x2, 2, bw, h - 17);
   const lin2db = v => 20 * Math.log10(Math.max(1e-6, v)); g.font = '10px "JetBrains Mono", monospace'; g.textAlign = 'right'; g.fillStyle = dim;
   for (const db of [0, -6, -12, -24, -36, -48, -60]) { const y = dbY(db, h); g.fillText(String(db), 26, y + 3); g.strokeStyle = gridCol; g.beginPath(); g.moveTo(28, y + .5); g.lineTo(x2 + bw + 3, y + .5); g.stroke(); }
-  const bar = (x, pk, rm, hold) => { const yP = dbY(lin2db(pk), h), yR = dbY(lin2db(rm), h); const grad = g.createLinearGradient(0, dbY(0, h), 0, dbY(-60, h)); grad.addColorStop(0, '#ff1383'); grad.addColorStop(.2, '#ffd100'); grad.addColorStop(.4, '#02ebba'); grad.addColorStop(1, '#0b6b58');
-    g.fillStyle = grad; g.globalAlpha = .45; g.fillRect(x, yP, bw, h - 15 - yP); g.globalAlpha = 1; g.fillRect(x + 3, yR, bw - 6, h - 15 - yR); g.fillStyle = '#fff'; g.fillRect(x, dbY(lin2db(hold), h), bw, 2); };
+  const bar = (x, pk, rm, hold) => { const yP = dbY(lin2db(pk), h), yR = dbY(lin2db(rm), h); const grad = g.createLinearGradient(0, dbY(0, h), 0, dbY(-60, h)); grad.addColorStop(0, '#ff1383'); grad.addColorStop(.06, '#ff1383'); grad.addColorStop(.09, '#b43dff'); grad.addColorStop(.26, '#a43dff'); grad.addColorStop(.30, '#1ea7ff'); grad.addColorStop(1, '#00d4ff');
+    g.fillStyle = grad; g.globalAlpha = .45; g.fillRect(x, yP, bw, h - 15 - yP); g.globalAlpha = 1; g.fillRect(x + 3, yR, bw - 6, h - 15 - yR); g.fillStyle = hold >= .98 ? '#ff1383' : '#fff'; g.fillRect(x, dbY(lin2db(hold), h), bw, 2); };
   bar(x1, state.peakL, state.rmsL, state.holdL); bar(x2, state.peakR, state.rmsR, state.holdR); g.textAlign = 'center'; g.fillStyle = dim; g.fillText('dBFS', 40, h - 2);
 }
 
