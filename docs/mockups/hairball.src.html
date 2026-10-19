@@ -1,4 +1,5 @@
 <title>Hairball</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700&family=JetBrains+Mono&display=swap">
 <meta name="claude:viewport-fit-sides" content="cover">
 <style>
 :root {
@@ -70,10 +71,23 @@ canvas { display: block; width: 100%; }
 .page { display: none; gap: 10px; grid-template-columns: repeat(12, minmax(0,1fr)); } .page.show { display: grid; }
 .sec { background: var(--panel-2); border: 1px solid var(--line); border-radius: 4px; padding: 8px 10px 10px; min-width: 0; }
 .sec .knobs { display: flex; flex-wrap: wrap; gap: 8px 4px; justify-content: flex-start; }
-.sec .gfx { margin-top: 8px; border: 1px solid var(--line); border-radius: 3px; background: #0a0a0c; }
+.sec .inner { display: block; }
+.sec.side .inner { display: flex; gap: 10px; align-items: flex-start; }
+.sec.side .inner .knobs { flex: 1 1 auto; min-width: 0; }
+.sec.side .inner .gfx { flex: none; }
+.sec .gfx { margin-top: 8px; width: 100%; border: 1px solid var(--line); border-radius: 3px; background: #0a0a0c; }
+#pg-grains { grid-template-columns: 430px 270px minmax(0,1fr); }
+#pg-grains .sec { grid-column: auto; }
+#pg-grains .sec[data-sec=Time] { grid-column: 1 / -1; }
+.outcol .knobwrap { width: 62px; } .outcol .knobwrap label { letter-spacing: 0; }
+.col { display: grid; gap: 10px; align-content: start; min-width: 0; }
+.sec.time .choicerow, .sec .choicerow { width: auto; }
+.sec .choicerow { flex: 1 1 100%; }
+.sec[data-sec=Time] .choicerow { flex: 1 1 420px; }
+.sec.side .gfx { margin-top: 0; }
 .sec .note { font-size: 12px; color: var(--ink-dim); margin-top: 6px; letter-spacing: .02em; }
 .c12 { grid-column: span 12; } .c8 { grid-column: span 8; } .c7 { grid-column: span 7; } .c6 { grid-column: span 6; } .c5 { grid-column: span 5; } .c4 { grid-column: span 4; } .c3 { grid-column: span 3; }
-.knobwrap { width: 86px; display: grid; justify-items: center; gap: 1px; }
+.knobwrap { width: 78px; display: grid; justify-items: center; gap: 1px; }
 .knobwrap label { font-size: 11.5px; text-transform: uppercase; letter-spacing: .04em; color: var(--ink-dim); white-space: nowrap; }
 .knob { width: 50px; height: 50px; cursor: ns-resize; touch-action: none; border-radius: 50%; }
 .knob svg { width: 100%; height: 100%; display: block; }
@@ -83,7 +97,7 @@ input.valin { font-family: var(--f-num); font-size: 12px; width: 62px; text-alig
 .choice .seg { width: 100%; }
 .choicerow { display: flex; gap: 10px; flex-wrap: wrap; width: 100%; }
 .outcol { display: grid; gap: 10px; align-content: start; }
-.meterbox { display: flex; gap: 6px; justify-content: center; align-items: stretch; height: 214px; }
+.meterbox { display: flex; gap: 6px; justify-content: center; align-items: stretch; height: 190px; }
 #meter { width: 74px; height: 100%; }
 .hint { color: var(--ink-dim); font-size: 12px; letter-spacing: .02em; }
 
@@ -163,7 +177,7 @@ footer { display: flex; justify-content: space-between; gap: 12px; flex-wrap: wr
         <div class="page" id="pg-grains"></div><div class="page" id="pg-riser"></div><div class="page" id="pg-thicken"></div>
       </div>
       <aside class="outcol">
-        <div class="box"><h3>Output</h3><div class="meterbox"><canvas id="meter" width="74" height="214"></canvas></div></div>
+        <div class="box"><h3>Output</h3><div class="meterbox"><canvas id="meter" width="74" height="190"></canvas></div></div>
         <div class="box"><div class="knobs" id="outK" style="display:flex;flex-wrap:wrap;gap:6px 2px;justify-content:center"></div></div>
       </aside>
     </section>
@@ -310,20 +324,36 @@ function onParam(id) {
 
 // ---------- layout building ----------
 const PAGES = {
-  grains: [['Grains', 'c6', ['attack', 'grainLen', 'spacing', 'waveSpacing', 'pan']], ['Effects', 'c3', ['lfoDepth', 'lfoSpeed', 'rand']], ['Transients', 'c3', ['transMode', 'transHold']],
-    ['Time', 'c12', ['loop', 'keyTo', 'start', 'root']]],
-  riser: [['Pitch', 'c6', ['pitch', 'fine', 'pitchEnv', 'pitchEnvT', 'pitchEnvC', 'glide'], 'penv'], ['Riser', 'c6', ['riseOn', 'riseTime', 'riseCurve', 'risePitch', 'riseGrain', 'riseTone', 'riseHz', 'riseFilter', 'riseKey'], 'rise'], ['Amp', 'c12', ['ampA', 'ampD', 'ampS', 'ampR', 'voices']]],
-  thicken: [['Thicken', 'c7', ['width', 'bassMono', 'lowG', 'midG', 'midF', 'midQ', 'highG'], 'resp'], ['Filter', 'c5', ['filtType', 'cutoff', 'reso']], ['Colour', 'c8', ['drive', 'transistor', 'fuzz'], 'xfer'], ['Dance', 'c4', ['dance'], 'gr']]
+  grains: [
+    { n: 'Grains', c: 'c5', ids: ['attack', 'grainLen', 'spacing', 'waveSpacing', 'pan'], gfx: 'gshape' },
+    { n: 'Effects', c: 'c3', ids: ['lfoDepth', 'lfoSpeed', 'rand'], gfx: 'lfo' },
+    { n: 'Transients', c: 'c4', ids: ['transMode', 'transHold'], note: 'Detect finds hits in the sound by itself. Regions would use slices you set in the plugin.' },
+    { n: 'Time', c: 'c12', ids: ['loop', 'keyTo', 'start', 'root'], note: 'Key to: Percent, Step and Transient use the keys from C5 up (green marks appear on the piano).' }],
+  riser: [
+    { n: 'Pitch', c: 'c6', col: 'L', ids: ['pitch', 'fine', 'pitchEnv', 'pitchEnvT', 'pitchEnvC', 'glide'], gfx: 'penv' },
+    { n: 'Amp', c: 'c6', col: 'L', ids: ['ampA', 'ampD', 'ampS', 'ampR', 'voices'], cls: 'amp', note: 'Instrument mode only. In FX mode the sound plays all the time.' },
+    { n: 'Riser', c: 'c6', ids: ['riseOn', 'riseKey', 'riseTime', 'riseCurve', 'risePitch', 'riseGrain', 'riseTone', 'riseHz', 'riseFilter'], gfx: 'rise' }],
+  thicken: [
+    { n: 'Thicken', c: 'c7', ids: ['width', 'bassMono', 'lowG', 'midG', 'midF', 'midQ', 'highG'] },
+    { n: 'Filter', c: 'c5', ids: ['filtType', 'cutoff', 'reso'], cls: 'filt' },
+    { n: 'Response', c: 'c12', ids: [], gfx: 'resp', note: 'Blue: EQ and filter together. Pink dashed: where the filter ends up when the riser is done.' },
+    { n: 'Colour', c: 'c8', ids: ['drive', 'transistor', 'fuzz'], gfx: 'xfer', side: true, note: 'Same three stages as PurrOne. Above 100 % needs Nasty range (right side).' },
+    { n: 'Dance', c: 'c4', ids: ['dance'], gfx: 'gr', side: true, note: 'Compressor on everything above 150 Hz. Bass stays untouched.' }]
 };
-const NOTEFORPAGE = { Time: 'Key to: Percent, Step and Transient use the keys from C5 up (green marks appear on the piano).', Transients: 'Detect finds hits in the sound by itself. Regions would use slices you set in the plugin.', Colour: 'Same three stages as PurrOne. Above 100 % needs Nasty range (right side).', Dance: 'Compressor on everything above 150 Hz. Bass stays untouched.', Amp: 'Instrument mode only. In FX mode the sound plays all the time.' };
+const GFXH = { gshape: 78, lfo: 70, penv: 96, rise: 120, resp: 118, xfer: 130, gr: 120 };
+function mkSec(sp) {
+  const s = document.createElement('div'); s.className = 'sec ' + sp.c + (sp.cls ? ' ' + sp.cls : '') + (sp.side ? ' side' : ''); s.dataset.sec = sp.n; s.innerHTML = `<h3>${sp.n}</h3><div class="inner"><div class="knobs"></div></div>`;
+  const k = $('.knobs', s), inner = $('.inner', s), chs = sp.ids.filter(i => BYID[i].choice), nk = sp.ids.filter(i => !BYID[i].choice);
+  if (chs.length) { const row = document.createElement('div'); row.className = 'choicerow'; chs.forEach(i => addCtl(row, i, sp.n)); k.appendChild(row); } nk.forEach(i => addCtl(k, i, sp.n));
+  if (!sp.ids.length) $('.knobs', s).remove();
+  if (sp.gfx) { const c = document.createElement('canvas'); c.className = 'gfx g-' + sp.gfx; c.id = 'g-' + sp.gfx; c.style.height = GFXH[sp.gfx] + 'px'; if (sp.side) c.style.width = (sp.gfx === 'xfer' ? 130 : 150) + 'px'; inner.appendChild(c); }
+  if (sp.note) { const n = document.createElement('div'); n.className = 'note'; n.textContent = sp.note; s.appendChild(n); } return s;
+}
 function build() {
-  for (const [pg, secs] of Object.entries(PAGES)) { const host = $('#pg-' + pg);
-    for (const [name, cls, ids, gfx] of secs) { const s = document.createElement('div'); s.className = 'sec ' + cls; s.innerHTML = `<h3>${name}</h3><div class="knobs"></div>`; const k = $('.knobs', s); const chs = ids.filter(i => BYID[i].choice), nk = ids.filter(i => !BYID[i].choice);
-      if (chs.length) { const row = document.createElement('div'); row.className = 'choicerow'; chs.forEach(i => addCtl(row, i, name)); k.appendChild(row); } nk.forEach(i => addCtl(k, i, name));
-      if (gfx) { const c = document.createElement('canvas'); c.className = 'gfx'; c.id = 'g-' + gfx; c.width = 480; c.height = gfx === 'xfer' ? 130 : 110; c.style.height = c.height * (gfx === 'xfer' ? .9 : 1) + 'px'; if (gfx === 'xfer') { c.style.width = '130px'; c.width = 130; c.style.height = '130px'; } if (gfx === 'gr') { c.width = 120; c.height = 110; } s.appendChild(c); }
-      if (NOTEFORPAGE[name]) { const n = document.createElement('div'); n.className = 'note'; n.textContent = NOTEFORPAGE[name]; s.appendChild(n); } host.appendChild(s); } }
-  ['mode', 'liveLen', 'capOff'].forEach(id => { if (id !== 'mode') addCtl($('#srcK'), id, 'Source'); });
-  ['mix', 'out'].forEach(id => addCtl($('#outK'), id, 'Output')); const oc = $('#outK'); ['safeLim', 'nasty'].forEach(id => { const d = BYID[id]; oc.appendChild(makeChoice(d, 'Output')); });
+  for (const [pg, secs] of Object.entries(PAGES)) { const host = $('#pg-' + pg), cols = {};
+    for (const sp of secs) { const s = mkSec(sp); if (sp.col) { let col = cols[sp.col]; if (!col) { col = cols[sp.col] = document.createElement('div'); col.className = 'col ' + sp.c; host.appendChild(col); } s.className = s.className.replace(/\bc\d+\b/, '').trim(); col.appendChild(s); } else host.appendChild(s); } }
+  ['liveLen', 'capOff'].forEach(id => addCtl($('#srcK'), id, 'Source'));
+  ['mix', 'out'].forEach(id => addCtl($('#outK'), id, 'Output')); const oc = $('#outK'); ['safeLim', 'nasty'].forEach(id => { oc.appendChild(makeChoice(BYID[id], 'Output')); });
 }
 
 // ---------- tips ----------
@@ -345,7 +375,7 @@ function syncTransport() {
   $('#bFreeze').classList.toggle('on', P.freeze >= .5); $('#bHold').classList.toggle('on', P.hold >= .5); $('#bRise').classList.toggle('on', P.riseOn >= .5); $('#bFreeze').disabled = !fx; $('#bCap').disabled = !fx;
   $('#srcK').style.opacity = fx ? 1 : .35; $('#srcK').style.pointerEvents = fx ? '' : 'none'; $('#dropnote').textContent = fx ? 'FX: the loop plays through Hairball' : 'Drop an audio file here';
   $('#legend').innerHTML = fx ? 'Right edge is now<br>pink line: where grains read' : 'Pink line: playing position<br>Green: start, orange: hits';
-  $('#pg-riser .sec.c12').style.opacity = fx ? .4 : 1; $$('#pg-riser .sec.c12 .knobwrap').forEach(k => k.style.pointerEvents = fx ? 'none' : '');
+  $('#pg-riser .sec.amp').style.opacity = fx ? .4 : 1; $$('#pg-riser .sec.amp .knobwrap').forEach(k => k.style.pointerEvents = fx ? 'none' : '');
   ['mode', 'freeze', 'hold', 'riseOn'].forEach(i => els[i] && els[i].draw());
 }
 $$('#modeSeg button').forEach(b => b.addEventListener('click', () => setParam('mode', +b.dataset.v)));
@@ -377,7 +407,7 @@ document.addEventListener('keydown', e => { if (e.repeat || e.ctrlKey || e.metaK
 document.addEventListener('keyup', e => { const k = e.key.toLowerCase(); if (k in QW) keyOff(state.octave + QW[k]); });
 
 // ---------- drawing ----------
-const gridCol = '#2a2d36', dim = '#8d92a0'; const dprOf = c => { const d = Math.min(2, window.devicePixelRatio || 1); const w = c.clientWidth || c.width, h = parseFloat(c.style.height) || c.height; const W = Math.round(w * d), H = Math.round(h * d); if (c.width !== W || c.height !== H) { c.width = W; c.height = H; } return d; };
+const gridCol = '#2a2d36', dim = '#8d92a0'; const dprOf = c => { const d = Math.min(2, window.devicePixelRatio || 1); const w = c.clientWidth || 100, h = c.clientHeight || parseFloat(c.style.height) || 100; const W = Math.round(w * d), H = Math.round(h * d); if (c.width !== W || c.height !== H) { c.width = W; c.height = H; } return d; };
 function prep(c) { const d = dprOf(c); const g = c.getContext('2d'); g.setTransform(d, 0, 0, d, 0, 0); return { g, w: c.width / d, h: c.height / d }; }
 let peaksCache = null, peaksKey = '';
 function drawMain() {
@@ -434,6 +464,23 @@ function drawResp() {
   curve(P.cutoff, '#6cc9f5', false);
   if (eng.riserProgress() > 0 && ft && P.riseOn >= .5) curve(clamp(P.cutoff * Math.pow(2, eng.riserProgress() * P.riseFilter), 20, 20000), '#ffffff55', true);
 }
+
+function drawGshape() {
+  const c = $('#g-gshape'); if (!c) return; const { g, w, h } = prep(c); g.fillStyle = '#0a0a0c'; g.fillRect(0, 0, w, h);
+  const att = Math.max(.8, P.attack), hold = P.grainLen, nominal = hold + att, hop = nominal * P.spacing * .01, len = hold + 2 * att, span = 3 * hop + len, pad = 8, pw = w - 2 * pad, X = ms => pad + ms / span * pw, base = h - 16, top = 8;
+  g.strokeStyle = gridCol; g.beginPath(); g.moveTo(pad, base + .5); g.lineTo(w - pad, base + .5); g.stroke();
+  const cols = ['#ff1383', '#a43dff'];
+  for (let k = 0; k < 4; ++k) { const x0 = k * hop; g.fillStyle = cols[k % 2] + '44'; g.strokeStyle = cols[k % 2]; g.lineWidth = 1.5; g.beginPath(); g.moveTo(X(x0), base);
+    for (let i = 0; i <= 24; ++i) { const t = i / 24 * att; g.lineTo(X(x0 + t), base - (.5 - .5 * Math.cos(Math.PI * t / att)) * (base - top)); } g.lineTo(X(x0 + att + hold - att * 0), top);
+    for (let i = 0; i <= 24; ++i) { const t = i / 24 * att; g.lineTo(X(x0 + att + hold + t - att * 0 - 0), base - (.5 + .5 * Math.cos(Math.PI * t / att)) * (base - top)); } g.closePath(); g.fill(); g.stroke(); }
+  g.fillStyle = dim; g.font = '10px "JetBrains Mono", monospace'; g.textAlign = 'left'; g.fillText('hop ' + hop.toFixed(0) + ' ms', pad, h - 3); g.textAlign = 'right'; g.fillText('overlap ' + (len / hop).toFixed(1) + 'x', w - pad, h - 3);
+}
+function drawLfo() {
+  const c = $('#g-lfo'); if (!c) return; const { g, w, h } = prep(c); g.fillStyle = '#0a0a0c'; g.fillRect(0, 0, w, h); const L = 30, pw = w - L - 6, T = 6, B = 14, ph = h - T - B, y = v => T + ph / 2 - v / 300 * ph / 2;
+  g.strokeStyle = gridCol; g.fillStyle = dim; g.font = '10px "JetBrains Mono", monospace'; g.textAlign = 'right'; for (const v of [300, 100, 0, -300]) { g.beginPath(); g.moveTo(L, y(v) + .5); g.lineTo(L + pw, y(v) + .5); g.stroke(); g.fillText(String(v), L - 3, y(v) + 3); }
+  g.strokeStyle = '#a43dff'; g.lineWidth = 2; g.beginPath(); for (let i = 0; i <= pw; ++i) { const t = i / pw, v = clamp(P.waveSpacing + P.lfoDepth * Math.sin(2 * Math.PI * P.lfoSpeed * t), -300, 300); i ? g.lineTo(L + i, y(v)) : g.moveTo(L + i, y(v)); } g.stroke();
+  g.fillStyle = dim; g.textAlign = 'right'; g.fillText('1 s', w - 6, h - 2); g.textAlign = 'left'; g.fillText('wave spacing %', L, h - 2);
+}
 let mkCache = { k: '', v: 1 };
 function drawXfer() {
   const c = $('#g-xfer'); if (!c) return; const { g, w, h } = prep(c); g.fillStyle = '#0a0a0c'; g.fillRect(0, 0, w, h); g.strokeStyle = gridCol; g.beginPath(); g.moveTo(w / 2 + .5, 0); g.lineTo(w / 2 + .5, h); g.moveTo(0, h / 2 + .5); g.lineTo(w, h / 2 + .5); g.stroke();
@@ -462,7 +509,7 @@ let visible = true, last = 0, powerSave = false, fxFrame = 0;
 new IntersectionObserver(es => { visible = es[0].isIntersecting; }).observe($('#unit'));
 function frame(t) {
   requestAnimationFrame(frame); if (document.hidden || !visible) return; if (t - last < (powerSave ? 50 : 16)) return; last = t; fxFrame++;
-  drawMain(); drawMeter(); const pg = $('.page.show'); const id = pg && pg.id;
+  drawMain(); drawMeter(); const pg = $('.page.show'); const id = pg && pg.id; if (id === 'pg-grains') { drawGshape(); drawLfo(); }
   if (id === 'pg-riser') { drawRise(); drawPenv(); } else if (id === 'pg-thicken') { drawResp(); drawXfer(); drawGr(); }
   if (eng && fxFrame % 6 === 0) $('#stat').textContent = `Voices ${P.mode >= .5 ? 1 : eng.activeVoices()} · Grains ${eng.activeGrains()} · CPU ${(state.cpu * 100).toFixed(1)}%`;
 }
