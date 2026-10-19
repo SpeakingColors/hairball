@@ -238,9 +238,32 @@ static void testSpeed()
     std::printf ("speed: FX mode default chain: %.0fx realtime (%.1f percent of one core)\n", 10.0 / sec2, 10.0 / sec2 > 0 ? 100.0 / (10.0 / sec2) : 0.0);
 }
 
+static void testPluginHooks()
+{
+    // sample prepared off the audio thread, swapped in without allocation; same result as loadSample
+    const Vec s = noise (96000, 0.5f, 33);
+    Rig a; a.e.loadSample (s.data(), nullptr, s.size(), SR);
+    Rig b; hb::Engine::Sample smp; hb::Engine::makeSample (smp, s.data(), nullptr, s.size(), SR, SR); b.e.swapSample (smp);
+    CHECK (smp.n == 0, "old sample handed back");
+    CHECK (b.e.sampleLength() == a.e.sampleLength() && b.e.detectedTransients() == a.e.detectedTransients(), "swapped sample equals loaded sample");
+    b.e.noteOn (60, 1.0f); a.e.noteOn (60, 1.0f);
+    Vec l1, r1, l2, r2; a.run (l1, r1, 4800); b.run (l2, r2, 4800);
+    double d = 0; for (size_t i = 0; i < l1.size(); ++i) d = std::max (d, (double) std::fabs (l1[i] - l2[i]));
+    CHECK (d == 0.0, "same audio from swapped sample, max diff %g", d);
+    // capture without allocation: needs reserved capacity, copies the ring oldest first
+    Rig f; f.p[hb::pMode] = 1; f.p[hb::pLiveLen] = 1; f.apply(); Vec in = noise (48000, 0.4f, 5); Vec l, r; f.run (l, r, 48000, &in, 0);
+    hb::Engine::Buf cap; CHECK (! f.e.captureInto (cap), "refuses without reserved capacity");
+    cap.l.reserve (f.e.ringLength() + 8); cap.r.reserve (f.e.ringLength() + 8);
+    CHECK (f.e.captureInto (cap) && cap.n == f.e.ringLength(), "capture length");
+    double dd = 0; for (size_t i = 0; i < cap.n; ++i) dd = std::max (dd, (double) std::fabs (cap.l[i] - in[in.size() - cap.n + i]));
+    CHECK (dd == 0.0, "captured audio equals the last second played, max diff %g", dd);
+    float marks[256]; CHECK (f.e.grainMarks (marks, 256) >= 0, "grain marks");
+    float heads[8]; CHECK (f.e.voiceHeads (heads, 8) == 1, "FX mode shows one read position");
+}
+
 int main()
 {
-    testParams(); testIdentity(); testPitchAndSpeed(); testFreezeReverseSpacing(); testRiserTone(); testLiveFreeze(); testTransients(); testChain(); testSafety(); testResponsiveness(); testSpeed();
+    testParams(); testIdentity(); testPitchAndSpeed(); testFreezeReverseSpacing(); testRiserTone(); testLiveFreeze(); testTransients(); testChain(); testSafety(); testResponsiveness(); testSpeed(); testPluginHooks();
     std::printf ("%d checks, %d failed\n", checks, fails);
     return fails ? 1 : 0;
 }

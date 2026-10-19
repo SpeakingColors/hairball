@@ -9,7 +9,10 @@ Works two ways:
 - **FX**: sits on a track, listens to what plays, and freezes, holds or rebuilds it live. Capture the frozen buffer into the plugin as a small sample.
 
 ## Status
-Version 0.1: the sound engine (pure C++, 272 passing checks) and an interactive design mockup. The JUCE plugin, installers and factory sound design are not built yet. See [ROADMAP](ROADMAP.md).
+Version 0.1.0 (test build): two VST3 plugins (Hairball, instrument; Hairball FX, effect) and a standalone app, from the same pure C++ engine (280 passing checks), with the real window built from the mockup, 11 factory presets, installers, and a PDF manual with an interface tour. Not tuned by ear and not tested in a real DAW yet. See [ROADMAP](ROADMAP.md).
+
+## Download
+Get the zip from the [Releases](../../releases) page: installers for Windows (.exe), macOS (.pkg), Linux (Flatpak extension and a plain .vst3 tarball), the manual and INSTALL.txt. Everything works offline. Free and open source; if you like it, you can support it on [Ko-fi](https://ko-fi.com/studio87).
 
 ## What it does
 - Grain controls: Attack, Hold, Grain spacing, Wave spacing, Pan; LFO on wave spacing; Rand

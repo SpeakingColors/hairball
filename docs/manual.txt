@@ -1,0 +1,27 @@
+# Intro
+Hairball takes sound that already exists and freezes it, smears it, stutters it and turns it into risers. It is not a granular synth built from scratch: it is a transformer and destroyer for audio. You use it in two ways. As an instrument (plugin "Hairball"), you load an audio file and play it with MIDI keys. As an effect (plugin "Hairball FX"), the audio of the track passes through it; you can freeze what it just heard, hold the playing position for a stutter, run a riser, or capture the buffer as a small sample.
+Both plugins come from the same code and have the same window and the same controls. Hairball FX starts in FX mode and listens to the track; Hairball starts in Instrument mode and does not take an audio input by default.
+This is a test build: it is not tuned by ear yet, and some numbers (for example the Dance settings) are approximate.
+
+# Quick start
+- Instrument: drop a WAV, AIFF, FLAC or OGG file on the main display (or click Load audio), then play the piano or your MIDI keyboard.
+- FX: put Hairball FX on an audio track and play. Press Freeze to loop what it just heard, or Hold for a stutter.
+- Capture turns the buffer into a small sample that you can play with the keys (it switches to Instrument).
+- Riser: switch Riser on in the Riser tab and press the Riser button; grains shrink, get closer and fuse into a pitched tone while pitch and filter climb.
+- Thicken tab: width, EQ, filter, Drive, Transistor, Fuzz and Dance.
+- Key to: Percent, Step and Transient use the keys from C5 up (green marks on the piano) to jump to a place in the sound.
+- Save your own sounds with Save. They stay on your computer when you uninstall unless you choose to delete them.
+
+# Recommendations
+- Pad from any sound: Freeze or a long loaded sound, Hold len 300 to 800 ms, Attack 100 to 250 ms, Gr. spacing 50 to 100 percent, then a little Width and Dance.
+- Smear: raise Attack so grains overlap, add a slow Depth on the LFO (Effects) for a moving texture.
+- Stutter: Hold in FX mode, short Hold len (10 to 40 ms) and Gr. spacing 100 percent.
+- Riser: Riser on, Time 4 to 16 s, Pitch up 12 to 36 st, raise Filter up for brightness, and keep the Limiter on.
+- If it gets harsh: lower High in Thicken, or turn Drive down before Fuzz.
+- Keep the Limiter on while you experiment, the Colour stages can get loud.
+
+# Install
+- Windows: run Hairball-Setup.exe. To remove it use Settings, Apps, Hairball. The uninstaller asks whether to also delete your saved presets.
+- macOS: open Hairball-macOS.pkg. To remove it run "Uninstall Hairball" from the Applications folder; it asks whether to also delete your saved presets.
+- Linux (Flatpak DAW): flatpak install --user the .flatpak file; remove with flatpak uninstall. Linux (native DAW): extract the tarball into ~/.vst3 and delete the Hairball.vst3 and Hairball FX.vst3 folders to remove.
+- Your saved presets live in a folder named Studio 87/Hairball/presets in your user application data folder (details in INSTALL.txt).

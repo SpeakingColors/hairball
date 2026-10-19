@@ -130,6 +130,10 @@ class Engine
 public:
     static constexpr int kVoices = 8, kGrains = 24, kChunk = 32, kMaxRingSeconds = 8;
 
+    struct Buf { std::vector<float> l, r; size_t n = 0; double ratio = 1.0; };
+    // A sample prepared away from the audio thread (plugin): swapSample() takes it over without allocating.
+    struct Sample : Buf { std::vector<size_t> detected; };
+
     void prepare (double sampleRate)
     {
         sr = sampleRate;
@@ -145,7 +149,7 @@ public:
         for (auto& v : voices) v = Voice();
         liveW = 0; frozen = false; ringN = (size_t) (4.0 * sr); lowState[0] = lowState[1] = 0; dcX[0] = dcX[1] = dcY[0] = dcY[1] = 0;
         for (int c = 0; c < 2; ++c) { lowSh[c].reset(); midBq[c].reset(); highSh[c].reset(); filt[c].reset(); sideLp = 0; }
-        coefsValid = false; smInit = false; danceEnv = 0; danceGain = 1.0f;
+        coefsValid = false; smInit = false; danceEnv = 0; danceGain = 1.0f; lastGr = 0.0f;
     }
 
     void setParams (const Params& p) { P = p; }
@@ -177,21 +181,70 @@ public:
     void setTransients (const std::vector<size_t>& t) { trans = t; std::sort (trans.begin(), trans.end()); regions = t; }
 
     // Onset detection on the sample: energy rise over a 256 sample hop, adaptive threshold, 80 ms minimum gap.
-    void detectTransients()
+    void detectTransients() { detect (smp, sr, detected); }
+    // Onset detection: energy rise over a 256 sample hop, adaptive threshold, 80 ms minimum gap. Static so the plugin can run it off the audio thread.
+    static void detect (const Buf& b, double engineSr, std::vector<size_t>& out)
     {
-        detected.clear();
-        if (smp.n < 2048) return;
-        const size_t hop = 256, frames = smp.n / hop;
+        out.clear();
+        if (b.n < 2048) return;
+        const size_t hop = 256, frames = b.n / hop;
         std::vector<float> e (frames);
-        for (size_t f = 0; f < frames; ++f) { double s = 0; for (size_t i = 0; i < hop; ++i) { const float x = 0.5f * (smp.l[f * hop + i] + smp.r[f * hop + i]); s += (double) x * x; } e[f] = (float) std::sqrt (s / hop); }
-        const size_t minGap = (size_t) (0.08 * smp.ratio * sr / hop) + 1; size_t last = 0; bool any = false;
+        for (size_t f = 0; f < frames; ++f) { double s = 0; for (size_t i = 0; i < hop; ++i) { const float x = 0.5f * (b.l[f * hop + i] + b.r[f * hop + i]); s += (double) x * x; } e[f] = (float) std::sqrt (s / hop); }
+        const size_t minGap = (size_t) (0.08 * b.ratio * engineSr / hop) + 1; size_t last = 0; bool any = false;
         for (size_t f = 2; f + 1 < frames; ++f)
         {
             double avg = 0; const size_t a0 = f > 24 ? f - 24 : 0; for (size_t k = a0; k < f; ++k) avg += e[k]; avg /= (double) (f - a0);
             const bool onset = e[f] > 1.8f * (float) avg + 0.01f && e[f] > e[f - 1] && e[f - 1] <= e[f - 2] * 1.5f + 1e-4f;
-            if (onset && (!any || f - last >= minGap)) { detected.push_back (f * hop); last = f; any = true; }
+            if (onset && (!any || f - last >= minGap)) { out.push_back (f * hop); last = f; any = true; }
         }
     }
+    // Build a Sample from raw audio (any rate; r may be null for mono). Allocates: call it on the message thread.
+    static void makeSample (Sample& s, const float* l, const float* r, size_t n, double fileSr, double engineSr)
+    {
+        s.l.assign (l, l + n); s.r.assign (r ? r : l, (r ? r : l) + n); s.n = n; s.ratio = fileSr / engineSr; detect (s, engineSr, s.detected);
+    }
+    // Audio thread: take over a prepared sample. Swaps vectors, never allocates; the old sample is left in s for the caller to free elsewhere.
+    void swapSample (Sample& s)
+    {
+        std::swap (smp.l, s.l); std::swap (smp.r, s.r); std::swap (smp.n, s.n); std::swap (smp.ratio, s.ratio); std::swap (detected, s.detected);
+        for (auto& v : voices) { v.head = 0; for (auto& g : v.g) g.on = false; }
+    }
+    // Audio thread: copy the capture ring (oldest first) into dst without allocating (dst must have capacity reserved for the longest ring).
+    bool captureInto (Buf& dst) const
+    {
+        const size_t N = ringN; if (N < 64 || dst.l.capacity() < N || dst.r.capacity() < N) return false;
+        dst.l.resize (N); dst.r.resize (N); dst.n = N; dst.ratio = 1.0; const size_t wr = liveW % N;
+        for (size_t i = 0; i < N; ++i) { const size_t k = (wr + i) % N; dst.l[i] = live.l[k]; dst.r[i] = live.r[k]; }
+        return true;
+    }
+    // Display helpers (plugin editor): read-only views, benign races on the float data.
+    const Buf& liveBuf() const { return live; }
+    size_t ringLength() const { return ringN; }
+    size_t liveWritten() const { return liveW; }
+    float lastGainReductionDb() const { return lastGr; }
+    // Normalised grain positions (0..1 of the sample, or of the ring while in FX mode), for the display. Returns how many were written.
+    int grainMarks (float* out, int maxOut) const
+    {
+        const bool fx = P[pMode] >= 0.5f; int k = 0;
+        const double nn = fx ? (double) ringN : (double) smp.n; if (nn < 16) return 0;
+        for (auto& v : voices) for (auto& g : v.g)
+        {
+            if (!g.on || k >= maxOut) continue;
+            double x; if (fx) { const double ahead = std::fmod ((double) (liveW % ringN) - g.idx + nn, nn); x = 1.0 - ahead / nn; } else x = g.idx / nn;
+            out[k++] = (float) clampf ((float) x, 0.f, 1.f);
+        }
+        return k;
+    }
+    // Playing positions of the voices that are on (0..1), for the display. Returns how many were written.
+    int voiceHeads (float* out, int maxOut) const
+    {
+        int k = 0; const bool fx = P[pMode] >= 0.5f;
+        if (fx) { const double nn = (double) ringN; if (nn > 16 && maxOut > 0) out[k++] = (float) clampf ((float) (1.0 - voices[0].lag / nn), 0.f, 1.f); return k; }
+        const double nn = (double) smp.n; if (nn < 16) return 0;
+        for (auto& v : voices) if (v.on && k < maxOut) out[k++] = (float) clampf ((float) (v.head / nn), 0.f, 1.f);
+        return k;
+    }
+    // Position of the riser shown on the graphs for the newest voice.
     const std::vector<size_t>& detectedTransients() const { return detected; }
 
     void noteOn (int note, float vel)
@@ -236,7 +289,6 @@ public:
     }
 
 private:
-    struct Buf { std::vector<float> l, r; size_t n = 0; double ratio = 1.0; };
     struct Grain { bool on = false; double idx = 0, rate = 1; int age = 0, len = 1, att = 1; float gl = 1, gr = 1, norm = 1; };
     struct Voice
     {
@@ -246,7 +298,7 @@ private:
 
     double sr = 48000;
     Params P;
-    Buf smp, live; size_t ringCap = 0, ringN = 0, liveW = 0; bool frozen = false;
+    Sample smp; Buf live; size_t ringCap = 0, ringN = 0, liveW = 0; bool frozen = false;
     std::vector<size_t> trans, regions, detected;
     Voice voices[kVoices];
     float win[1025];
@@ -256,7 +308,7 @@ private:
     Biquad lowSh[2], midBq[2], highSh[2]; Svf filt[2]; float lowState[2] = { 0, 0 }, sideLp = 0, dcX[2] = { 0, 0 }, dcY[2] = { 0, 0 };
     float smMix = 1, smOut = 1, smWidth = 1, smBassMono = 0, smLow = 0, smMid = 0, smMidF = 1000, smHigh = 0, smCut = 12000, smReso = 0.7f, smDrive = 0, smX = 0, smFuzz = 0, smDance = 0;
     bool smInit = false, coefsValid = false; float cLow = 1e9f, cMid = 1e9f, cMidF = 1e9f, cMidQ = 1e9f, cHigh = 1e9f, cCut = 1e9f, cRes = 1e9f, mk = 1.0f, mkD = -1, mkX = -1, mkF = -1;
-    float danceEnv = 0, danceGain = 1.0f;
+    float danceEnv = 0, danceGain = 1.0f, lastGr = 0.0f;
 
     static float lerp (float a, float b, float t) { return a + (b - a) * t; }
     float readWin (float x) const { x = clampf (x, 0.f, 1.f) * 1024.0f; const int i = (int) x; const float f = x - (float) i; return win[i] + (win[std::min (i + 1, 1024)] - win[i]) * f; }
@@ -543,10 +595,12 @@ private:
                 danceEnv += (pk - danceEnv) * (pk > danceEnv ? atk : rel);
                 const float db = 20.0f * std::log10 (std::max (1e-6f, danceEnv));
                 const float gr_db = db > thr ? -(db - thr) * (1.0f - 1.0f / ratio) : 0.0f;
+                lastGr = gr_db;
                 const float g = dbToLin (gr_db + mkDb * smDance);
                 gl[i] = lowState[0] + hl * g; gr[i] = lowState[1] + hr * g;
             }
         }
+        else lastGr = 0.0f;
         for (int i = 0; i < c; ++i) { gl[i] *= smOut; gr[i] *= smOut; }
     }
     float smCutoffEff (float riseU) const { return P[pCutoff] * std::pow (2.0f, riseU * P[pRiseFilter]); }

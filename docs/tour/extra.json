@@ -1,0 +1,32 @@
+{
+ "hairball": {
+  "flow": "Instrument: loaded sound (or captured buffer) > grains (Attack, Hold len, Gr. spacing, Wave spacing, Pan, LFO, transients) > Pitch and Amp envelope per voice (up to 8 voices) > Thicken (Width, Bass mono, 3 band EQ) > Filter > Colour (Drive, Transistor, Fuzz) > Dance > Dry/wet and Limiter > Output. FX: the track audio is kept in a ring buffer of up to 8 seconds; Freeze loops it, Lag keeps the grains just behind the live audio; the same chain follows.",
+  "names": {},
+  "displays": {
+   "A": "Main display. Instrument: the loaded sound as a waveform. FX: the audio the track sent, newest on the right; it turns blue while frozen. Dashed green line: the Start position (Instrument: click anywhere on the display to set it). Orange ticks at the top: transient marks when Transients is Regions or Detect. White marks: where grains are reading (switch off with Show grains on the display in Settings). Pink lines: where the voices are playing now. Bottom right: length of the sound, or the buffer length in seconds. Drop an audio file on it to load it.",
+   "B": "Piano keys (36 keys, with Octave - and +). Click a key or use your MIDI keyboard. Computer keys: Z S X D C V G B H N J M and Q 2 W 3 E R 5 T 6 Y 7 U I. When Key to is Percent, Step or Transient, the keys from C5 up are marked green: they jump to a place in the sound instead of changing the pitch.",
+   "C": "Output meter, in dBFS. The translucent bar is the peak, the solid inner bar the level (RMS), and a line holds the peak for 1.5 seconds. Neon blue is safe, purple is a warning, pink is clipping.",
+   "D": "Grain shape. Four grains one after another: pink and violet shapes. Each grain fades in over Attack, holds for Hold len, and fades out over Attack. The distance between grain starts is the hop (shown bottom left in ms); the overlap (shown bottom right) is how many grains cover each other.",
+   "E": "LFO and wave spacing, over one second. Vertical: Wave spacing in percent (-300 to +300); the violet line is Wave spacing plus the LFO (Depth, Speed) moving around it. Flat when Depth is 0.",
+   "F": "Pitch envelope. Horizontal: time from the note start. Vertical: semitones (the scale grows with Env amt). The green line starts at Env amt, goes to 0 st over Env time and is bent by Env curve.",
+   "G": "Riser. Horizontal: time, 0 s to the Time setting. Vertical: the pitch climb, 0 to Pitch up. The pink line is the riser progress (bent by Curve; dim when the Riser is off). The dashed green line is the tone share (Tone). When a riser is running, a white dot shows where it is.",
+   "H": "Response. Horizontal: frequency, 20 Hz to 20 kHz (log). Vertical: -24 to +24 dB. The blue line is the sum of Low (shelf at 120 Hz), Mid (bell at Mid Hz), High (shelf at 8 kHz) and the Filter. When the Riser is on, the dashed pink line shows where the filter ends up; while it runs, a dashed white line shows where it is now.",
+   "I": "Transfer curve of the Colour stages (Drive, Transistor, Fuzz). Horizontal: input level (-1 to +1), vertical: output level. The dashed grey diagonal is no change; the orange line is what the stages do to the signal. The curve is drawn after level matching.",
+   "J": "Dance gain reduction. A green bar grows downward from 0 dB to -12 dB scale while the Dance stage turns the level down; it moves with the sound."
+  },
+  "deep": [
+   "Parameters: 57, all host parameters (automatable). Every control has an info bubble after 1 second (can be switched off in Settings).",
+   "Latency: 0 samples (reported to the host as such). Nothing looks ahead.",
+   "Smoothing: level, mix, width, EQ, filter, Colour and Dance values move over about 10 ms, so a knob change is heard within one audio buffer without clicks.",
+   "Engine: up to 8 voices, up to 24 grains alive per voice, processing in blocks of 32 samples. FX mode keeps up to 8 seconds in a ring buffer. In core tests 8 voices with dense grains, drive, Dance, filter and EQ ran at about 17 times real time (about 6 percent of one core at 48 kHz); the default FX chain at about 220 times real time (0.5 percent of one core). Measured on a test machine, not on yours.",
+   "Limiter: when on, it only touches the wet path (so Dry/wet 0 stays bit exact). It is a soft limiter above about -0.9 dBFS that rounds peaks toward 0 dBFS; it does not look ahead.",
+   "Nasty range: lets Drive, Transistor and Fuzz go from 100 up to 200 percent. Without it they stop at 100 percent.",
+   "Dance: a glue stage that compresses everything above 150 Hz and leaves the bass alone. The amount moves threshold (from -6 to -30 dB) and ratio (from 2:1 to 6:1) together. The numbers are approximate and not tuned by ear.",
+   "Colour: Drive is a symmetric clip, Transistor is asymmetric (even harmonics), Fuzz is lopsided and gets nasty above 80 percent. The stages are level matched, so compare by ear with the knob at zero and at full. The stages are not oversampled yet, and aliasing has not been measured.",
+   "A loaded file is remembered by its location (path), not copied into the session: keep the file where it is, or Hairball shows a message that the sound file was not found. Captured audio is stored inside the session (16 bit, up to 3,000,000 frames).",
+   "Samples are loaded in the interface thread and handed to the audio thread without locks; nothing on the audio thread waits for a file, a lock or the network.",
+   "Presets: factory presets first, then your own. Your own are stored as small text files; Export shows the preset as text you can copy, Import checks pasted text before using it.",
+   "Not tested yet: a real DAW session, the installers on real machines, and whether every host treats the instrument and the FX plugin the way it should. The pictures in this tour come from the interactive test page of the plugin window; the compiled window may differ by a few pixels."
+  ]
+ }
+}

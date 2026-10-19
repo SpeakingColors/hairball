@@ -1,0 +1,1475 @@
+{
+ "key": "hairball",
+ "preset": "Init",
+ "tabs": [],
+ "top": [
+  {
+   "sid": "grains_1",
+   "name": "Previous preset",
+   "kind": "button",
+   "value": "",
+   "box": [
+    128,
+    79.5,
+    32.640625,
+    31
+   ],
+   "tip": "Previous preset",
+   "n": 1
+  },
+  {
+   "sid": "grains_2",
+   "name": "Preset menu",
+   "kind": "button",
+   "value": "",
+   "box": [
+    166.640625,
+    79,
+    641.5,
+    32
+   ],
+   "tip": "Preset list: factory presets first, then your own.",
+   "n": 2
+  },
+  {
+   "sid": "grains_3",
+   "name": "Next preset",
+   "kind": "button",
+   "value": "",
+   "box": [
+    814.140625,
+    79.5,
+    32.640625,
+    31
+   ],
+   "tip": "Next preset",
+   "n": 3
+  },
+  {
+   "sid": "grains_4",
+   "name": "Save",
+   "kind": "button",
+   "value": "",
+   "box": [
+    852.78125,
+    79.5,
+    62.609375,
+    31
+   ],
+   "tip": "Save the current sound. Overwrite your own preset or save as a new one.",
+   "n": 4
+  },
+  {
+   "sid": "grains_5",
+   "name": "Rename",
+   "kind": "button",
+   "value": "",
+   "box": [
+    921.390625,
+    79.5,
+    86.578125,
+    31
+   ],
+   "tip": "Rename your preset.",
+   "n": 5
+  },
+  {
+   "sid": "grains_6",
+   "name": "Delete",
+   "kind": "button",
+   "value": "",
+   "box": [
+    1013.96875,
+    79.5,
+    81.53125,
+    31
+   ],
+   "tip": "Delete your preset. Factory presets cannot be deleted.",
+   "n": 6
+  },
+  {
+   "sid": "grains_7",
+   "name": "Export",
+   "kind": "button",
+   "value": "",
+   "box": [
+    1101.5,
+    79.5,
+    83.703125,
+    31
+   ],
+   "tip": "Show the preset as text you can copy.",
+   "n": 7
+  },
+  {
+   "sid": "grains_8",
+   "name": "Import",
+   "kind": "button",
+   "value": "",
+   "box": [
+    1191.203125,
+    79.5,
+    80.796875,
+    31
+   ],
+   "tip": "Paste preset text. It is checked before it is used.",
+   "n": 8
+  },
+  {
+   "sid": "grains_9",
+   "name": "Audio (mockup page only)",
+   "kind": "button",
+   "value": "",
+   "box": [
+    758.5,
+    36.5,
+    87.09375,
+    31
+   ],
+   "tip": "Audio on or off. Browsers need one click before they play sound.",
+   "n": 9
+  },
+  {
+   "sid": "grains_10",
+   "name": "Guide",
+   "kind": "button",
+   "value": "",
+   "box": [
+    853.59375,
+    36.5,
+    70.375,
+    31
+   ],
+   "tip": "Opens the short guide: how to use Instrument and FX, Freeze, Hold, Capture, Riser and Thicken, the Key to keys, and how to see a hint.",
+   "n": 10
+  },
+  {
+   "sid": "grains_11",
+   "name": "Settings",
+   "kind": "button",
+   "value": "",
+   "box": [
+    931.96875,
+    36.5,
+    97.328125,
+    31
+   ],
+   "tip": "Menu: info bubbles on or off, power saving, show grains on the display, reset the window size to 100%, open the GitHub page.",
+   "n": 11
+  },
+  {
+   "sid": "grains_12",
+   "name": "About & Support",
+   "kind": "button",
+   "value": "",
+   "box": [
+    1037.296875,
+    36.5,
+    165.28125,
+    31
+   ],
+   "tip": "Studio 87, version, licence (AGPL-3.0-or-later), where your saved sounds live, and the Support on Ko-fi button. Nothing is sent anywhere; the button only opens a link when you click it.",
+   "n": 12
+  },
+  {
+   "sid": "grains_13",
+   "name": "Window size",
+   "kind": "button",
+   "value": "",
+   "box": [
+    1210.578125,
+    36.5,
+    61.421875,
+    31
+   ],
+   "tip": "Window size, percent of the default. Drag any edge or corner to resize; double click the wood to go back to 100%.",
+   "n": 13
+  }
+ ],
+ "items": [
+  {
+   "title": "Source, display and keys",
+   "wide": true,
+   "disp": {
+    "letter": "A",
+    "id": "main",
+    "box": [
+     329,
+     133,
+     782,
+     212
+    ]
+   },
+   "disps": [
+    {
+     "letter": "A",
+     "id": "main",
+     "box": [
+      329,
+      133,
+      782,
+      212
+     ]
+    },
+    {
+     "letter": "B",
+     "id": "kbd",
+     "box": [
+      209.65625,
+      832,
+      1062.34375,
+      74
+     ]
+    }
+   ],
+   "tab": "grains",
+   "items": [
+    {
+     "sid": "grains_14",
+     "name": "Mode",
+     "kind": "choice",
+     "value": "",
+     "box": [
+      139,
+      170,
+      169.0625,
+      28
+     ],
+     "tip": "Instrument plays the loaded sample with MIDI. FX works on the audio passing through the track. (Instrument / FX)",
+     "n": 14
+    },
+    {
+     "sid": "grains_15",
+     "name": "Audio source",
+     "kind": "menu",
+     "value": "",
+     "box": [
+      139,
+      206,
+      169.0625,
+      31
+     ],
+     "tip": "Instrument: the sound you play with the keys. FX: the audio that passes through the track. In the plugin FX listens to the track; here you pick a loop or drop a file.",
+     "n": 15
+    },
+    {
+     "sid": "grains_16",
+     "name": "Freeze",
+     "kind": "button",
+     "value": "",
+     "box": [
+      139,
+      245,
+      81.53125,
+      31
+     ],
+     "tip": "FX: stop recording and loop what is in the buffer. Grains then play only the frozen audio.",
+     "n": 16
+    },
+    {
+     "sid": "grains_17",
+     "name": "Hold",
+     "kind": "button",
+     "value": "",
+     "box": [
+      226.53125,
+      245,
+      81.53125,
+      31
+     ],
+     "tip": "Holds the playing position still. Click to latch, or press and hold for a stutter.",
+     "n": 17
+    },
+    {
+     "sid": "grains_18",
+     "name": "Play",
+     "kind": "button",
+     "value": "",
+     "box": [
+      139,
+      284,
+      169.0625,
+      35
+     ],
+     "tip": "Instrument: plays the sound at its root key and keeps playing until you press again. You can also click the piano keys. FX: the loop plays by itself.",
+     "n": 18
+    },
+    {
+     "sid": "grains_19",
+     "name": "Riser",
+     "kind": "button",
+     "value": "",
+     "box": [
+      139,
+      327,
+      68.9375,
+      31
+     ],
+     "tip": "Starts the riser: grains shrink, get closer and fuse into a pitched tone while pitch and filter climb.",
+     "n": 19
+    },
+    {
+     "sid": "grains_20",
+     "name": "Capture",
+     "kind": "button",
+     "value": "",
+     "box": [
+      213.9375,
+      327,
+      94.125,
+      31
+     ],
+     "tip": "FX: record what the buffer holds into Hairball as a small sample and switch to Instrument to play it.",
+     "n": 20
+    },
+    {
+     "sid": "grains_21",
+     "name": "Capture",
+     "kind": "knob",
+     "value": "",
+     "box": [
+      1147,
+      183,
+      50,
+      50
+     ],
+     "tip": "How many seconds of the incoming audio Hairball keeps ready to freeze (FX mode). (0.50 s to 8.00 s, default 4.00 s)",
+     "n": 21
+    },
+    {
+     "sid": "grains_22",
+     "name": "Lag",
+     "kind": "knob",
+     "value": "",
+     "box": [
+      1147,
+      269,
+      50,
+      50
+     ],
+     "tip": "FX mode, not frozen: how far behind the live audio the grains read. (0.0 ms to 2.00 s, default 120 ms)",
+     "n": 22
+    }
+   ],
+   "box": [
+    128,
+    132,
+    1144,
+    774
+   ],
+   "img": "hairball_p1.png"
+  },
+  {
+   "title": "Output",
+   "wide": false,
+   "disp": {
+    "letter": "C",
+    "id": "meter",
+    "box": [
+     1160,
+     415,
+     74,
+     190
+    ]
+   },
+   "disps": [
+    {
+     "letter": "C",
+     "id": "meter",
+     "box": [
+      1160,
+      415,
+      74,
+      190
+     ]
+    }
+   ],
+   "tab": "grains",
+   "items": [
+    {
+     "sid": "grains_23",
+     "name": "Dry/wet",
+     "kind": "knob",
+     "value": "",
+     "box": [
+      1140,
+      646,
+      50,
+      50
+     ],
+     "tip": "Blend between the untouched input and Hairball. At 0 the input passes bit for bit. (0% to 100%, default 100%)",
+     "n": 23
+    },
+    {
+     "sid": "grains_24",
+     "name": "Output",
+     "kind": "knob",
+     "value": "",
+     "box": [
+      1204,
+      646,
+      50,
+      50
+     ],
+     "tip": "Output level. (-24.0 dB to +12.0 dB, default 0.0 dB)",
+     "n": 24
+    },
+    {
+     "sid": "grains_25",
+     "name": "Limiter",
+     "kind": "choice",
+     "value": "",
+     "box": [
+      1132,
+      735,
+      130,
+      28
+     ],
+     "tip": "Safety limiter at the output, never above 0 dBFS. (Off / On)",
+     "n": 25
+    },
+    {
+     "sid": "grains_26",
+     "name": "Nasty range",
+     "kind": "choice",
+     "value": "",
+     "box": [
+      1132,
+      785,
+      130,
+      28
+     ],
+     "tip": "Lets Drive, Transistor and Fuzz go beyond 100 percent. Off by default. (Off / On)",
+     "n": 26
+    }
+   ],
+   "box": [
+    1122,
+    385,
+    150,
+    437
+   ],
+   "img": "hairball_p2.png"
+  },
+  {
+   "title": "Grains",
+   "wide": false,
+   "disp": {
+    "id": "gshape",
+    "box": [
+     139,
+     543,
+     408,
+     78
+    ],
+    "letter": "D"
+   },
+   "disps": [
+    {
+     "id": "gshape",
+     "box": [
+      139,
+      543,
+      408,
+      78
+     ],
+     "letter": "D"
+    }
+   ],
+   "tab": "grains",
+   "items": [
+    {
+     "sid": "grains_27",
+     "name": "Attack",
+     "kind": "knob",
+     "value": "",
+     "box": [
+      153,
+      468,
+      50,
+      50
+     ],
+     "tip": "Fade in and fade out of each grain. Added to the grain length on both ends. (0.0 ms to 250 ms, default 20.0 ms)",
+     "n": 27
+    },
+    {
+     "sid": "grains_28",
+     "name": "Hold len",
+     "kind": "knob",
+     "value": "",
+     "box": [
+      235,
+      468,
+      50,
+      50
+     ],
+     "tip": "Length each grain plays before the next one takes over. (2.0 ms to 800 ms, default 80.0 ms)",
+     "n": 28
+    },
+    {
+     "sid": "grains_29",
+     "name": "Gr. spacing",
+     "kind": "knob",
+     "value": "",
+     "box": [
+      317.796875,
+      468,
+      50,
+      50
+     ],
+     "tip": "Gap between grains. 100 percent places them end to end with a clean crossfade. Lower means more overlap and a thicker sound, higher means gaps. (25% to 400%, default 100%)",
+     "n": 29
+    },
+    {
+     "sid": "grains_30",
+     "name": "Wave spacing",
+     "kind": "knob",
+     "value": "",
+     "box": [
+      406.109375,
+      468,
+      50,
+      50
+     ],
+     "tip": "How fast the playing position moves through the sound. 100 is normal, 0 freezes, negative plays the grains backwards in order, 300 is three times faster. (-300% to 300%, default 100%)",
+     "n": 30
+    },
+    {
+     "sid": "grains_31",
+     "name": "Pan",
+     "kind": "knob",
+     "value": "",
+     "box": [
+      481,
+      468,
+      50,
+      50
+     ],
+     "tip": "Odd grains go left, even grains go right. 0 is off. (0% to 100%, default 0%)",
+     "n": 31
+    }
+   ],
+   "box": [
+    128,
+    425,
+    430,
+    221
+   ],
+   "img": "hairball_p3.png"
+  },
+  {
+   "title": "Effects",
+   "wide": false,
+   "disp": {
+    "id": "lfo",
+    "box": [
+     579,
+     543,
+     248,
+     70
+    ],
+    "letter": "E"
+   },
+   "disps": [
+    {
+     "id": "lfo",
+     "box": [
+      579,
+      543,
+      248,
+      70
+     ],
+     "letter": "E"
+    }
+   ],
+   "tab": "grains",
+   "items": [
+    {
+     "sid": "grains_32",
+     "name": "Depth",
+     "kind": "knob",
+     "value": "",
+     "box": [
+      593,
+      468,
+      50,
+      50
+     ],
+     "tip": "Size of the LFO that moves Wave spacing. 0 is off. (0% to 300%, default 0%)",
+     "n": 32
+    },
+    {
+     "sid": "grains_33",
+     "name": "Speed",
+     "kind": "knob",
+     "value": "",
+     "box": [
+      675,
+      468,
+      50,
+      50
+     ],
+     "tip": "Speed of the LFO on Wave spacing. (0.1 Hz to 30.0 Hz, default 2.0 Hz)",
+     "n": 33
+    },
+    {
+     "sid": "grains_34",
+     "name": "Rand",
+     "kind": "knob",
+     "value": "",
+     "box": [
+      757,
+      468,
+      50,
+      50
+     ],
+     "tip": "Randomises where each grain starts, so the order is shuffled. 0 is off. (0% to 100%, default 0%)",
+     "n": 34
+    }
+   ],
+   "box": [
+    568,
+    425,
+    270,
+    221
+   ],
+   "img": "hairball_p4.png"
+  },
+  {
+   "title": "Transients",
+   "wide": false,
+   "disp": null,
+   "disps": [],
+   "tab": "grains",
+   "items": [
+    {
+     "sid": "grains_35",
+     "name": "Transients",
+     "kind": "choice",
+     "value": "",
+     "box": [
+      859,
+      471,
+      242,
+      28
+     ],
+     "tip": "Grains that cross a hit snap to it and take the Transient length. Off, Regions (slices you provide) or Detect (automatic). (Off / Regions / Detect)",
+     "n": 35
+    },
+    {
+     "sid": "grains_36",
+     "name": "Trans. len",
+     "kind": "knob",
+     "value": "",
+     "box": [
+      873,
+      520,
+      50,
+      50
+     ],
+     "tip": "Length of grains that start on a transient. (2.0 ms to 400 ms, default 40.0 ms)",
+     "n": 36
+    }
+   ],
+   "box": [
+    848,
+    425,
+    264,
+    221
+   ],
+   "img": "hairball_p5.png"
+  },
+  {
+   "title": "Time",
+   "wide": false,
+   "disp": null,
+   "disps": [],
+   "tab": "grains",
+   "items": [
+    {
+     "sid": "grains_37",
+     "name": "Loop",
+     "kind": "choice",
+     "value": "",
+     "box": [
+      139,
+      702,
+      394,
+      28
+     ],
+     "tip": "Loop the sound when the position reaches the end. (Off / On)",
+     "n": 37
+    },
+    {
+     "sid": "grains_38",
+     "name": "Key to",
+     "kind": "choice",
+     "value": "",
+     "box": [
+      543,
+      702,
+      394,
+      28
+     ],
+     "tip": "What the MIDI keys do: Pitch, Percent (C5 to C7 pick the start position), Step (C5 and up offset the start by steps), Transient (C5 and up pick a slice). (Pitch / Percent / Step / Transient)",
+     "n": 38
+    },
+    {
+     "sid": "grains_39",
+     "name": "Start",
+     "kind": "knob",
+     "value": "",
+     "box": [
+      955,
+      699,
+      50,
+      50
+     ],
+     "tip": "Where in the sound playing starts. (0% to 100%, default 0%)",
+     "n": 39
+    },
+    {
+     "sid": "grains_40",
+     "name": "Root key",
+     "kind": "knob",
+     "value": "",
+     "box": [
+      1037,
+      699,
+      50,
+      50
+     ],
+     "tip": "The MIDI note that plays the sound at its original pitch. (C1 to C7, default C4)",
+     "n": 40
+    }
+   ],
+   "box": [
+    128,
+    656,
+    984,
+    141
+   ],
+   "img": "hairball_p6.png"
+  },
+  {
+   "title": "Pitch",
+   "wide": false,
+   "disp": {
+    "id": "penv",
+    "box": [
+     139,
+     543,
+     418,
+     70
+    ],
+    "letter": "F"
+   },
+   "disps": [
+    {
+     "id": "penv",
+     "box": [
+      139,
+      543,
+      418,
+      70
+     ],
+     "letter": "F"
+    }
+   ],
+   "tab": "riser",
+   "items": [
+    {
+     "sid": "riser_27",
+     "name": "Pitch",
+     "kind": "knob",
+     "value": "",
+     "box": [
+      147,
+      468,
+      50,
+      50
+     ],
+     "tip": "Pitch in semitones. Grains are read faster or slower; the position still moves at Wave spacing. (-48.0 st to +48.0 st, default 0.0 st)",
+     "n": 41
+    },
+    {
+     "sid": "riser_28",
+     "name": "Fine",
+     "kind": "knob",
+     "value": "",
+     "box": [
+      217,
+      468,
+      50,
+      50
+     ],
+     "tip": "Fine tune in cents. (-100 ct to +100 ct, default 0 ct)",
+     "n": 42
+    },
+    {
+     "sid": "riser_29",
+     "name": "Env amt",
+     "kind": "knob",
+     "value": "",
+     "box": [
+      287,
+      468,
+      50,
+      50
+     ],
+     "tip": "Pitch envelope. Starts this many semitones away from the pitch and glides back to it. (-48.0 st to +48.0 st, default 0.0 st)",
+     "n": 43
+    },
+    {
+     "sid": "riser_30",
+     "name": "Env time",
+     "kind": "knob",
+     "value": "",
+     "box": [
+      357,
+      468,
+      50,
+      50
+     ],
+     "tip": "How long the pitch envelope takes to return to the set pitch. (5.0 ms to 8.00 s, default 300 ms)",
+     "n": 44
+    },
+    {
+     "sid": "riser_31",
+     "name": "Env curve",
+     "kind": "knob",
+     "value": "",
+     "box": [
+      429.515625,
+      468,
+      50,
+      50
+     ],
+     "tip": "Shape of the pitch envelope. Below 1 snaps back fast, above 1 lingers away from the pitch. (0.20x to 5.00x, default 1.00x)",
+     "n": 45
+    },
+    {
+     "sid": "riser_32",
+     "name": "Glide",
+     "kind": "knob",
+     "value": "",
+     "box": [
+      497,
+      468,
+      50,
+      50
+     ],
+     "tip": "Instrument: time to slide between notes. (0.0 ms to 2.00 s, default 0.0 ms)",
+     "n": 46
+    }
+   ],
+   "box": [
+    128,
+    425,
+    440,
+    199
+   ],
+   "img": "hairball_p7.png"
+  },
+  {
+   "title": "Amp",
+   "wide": false,
+   "disp": null,
+   "disps": [],
+   "tab": "riser",
+   "items": [
+    {
+     "sid": "riser_33",
+     "name": "Attack",
+     "kind": "knob",
+     "value": "",
+     "box": [
+      147,
+      677,
+      50,
+      50
+     ],
+     "tip": "Instrument: note fade in. (0.0 ms to 4.00 s, default 5.0 ms)",
+     "n": 47
+    },
+    {
+     "sid": "riser_34",
+     "name": "Decay",
+     "kind": "knob",
+     "value": "",
+     "box": [
+      217,
+      677,
+      50,
+      50
+     ],
+     "tip": "Instrument: fall to the sustain level. (0.0 ms to 4.00 s, default 200 ms)",
+     "n": 48
+    },
+    {
+     "sid": "riser_35",
+     "name": "Sustain",
+     "kind": "knob",
+     "value": "",
+     "box": [
+      287,
+      677,
+      50,
+      50
+     ],
+     "tip": "Instrument: level while the key is held. (0% to 100%, default 100%)",
+     "n": 49
+    },
+    {
+     "sid": "riser_36",
+     "name": "Release",
+     "kind": "knob",
+     "value": "",
+     "box": [
+      357,
+      677,
+      50,
+      50
+     ],
+     "tip": "Instrument: note fade out. (0.0 ms to 8.00 s, default 250 ms)",
+     "n": 50
+    },
+    {
+     "sid": "riser_37",
+     "name": "Voices",
+     "kind": "knob",
+     "value": "",
+     "box": [
+      427,
+      677,
+      50,
+      50
+     ],
+     "tip": "Instrument: how many notes can play at once. Fewer voices use less CPU. (1 to 8, default 4)",
+     "n": 51
+    }
+   ],
+   "box": [
+    128,
+    634,
+    440,
+    121
+   ],
+   "img": "hairball_p8.png"
+  },
+  {
+   "title": "Riser",
+   "wide": false,
+   "disp": {
+    "id": "rise",
+    "box": [
+     589,
+     595,
+     512,
+     100
+    ],
+    "letter": "G"
+   },
+   "disps": [
+    {
+     "id": "rise",
+     "box": [
+      589,
+      595,
+      512,
+      100
+     ],
+     "letter": "G"
+    }
+   ],
+   "tab": "riser",
+   "items": [
+    {
+     "sid": "riser_38",
+     "name": "Riser",
+     "kind": "choice",
+     "value": "",
+     "box": [
+      589,
+      471,
+      251,
+      28
+     ],
+     "tip": "Starts the riser. In Instrument mode every note starts it. Turn it off and it eases back. (Off / On)",
+     "n": 52
+    },
+    {
+     "sid": "riser_39",
+     "name": "Follow key",
+     "kind": "choice",
+     "value": "",
+     "box": [
+      850,
+      471,
+      251,
+      28
+     ],
+     "tip": "Instrument: the riser tone follows the key you play. (Off / On)",
+     "n": 53
+    },
+    {
+     "sid": "riser_40",
+     "name": "Time",
+     "kind": "knob",
+     "value": "",
+     "box": [
+      597,
+      520,
+      50,
+      50
+     ],
+     "tip": "How long the riser takes to reach its end. (0.10 s to 32.00 s, default 4.00 s)",
+     "n": 54
+    },
+    {
+     "sid": "riser_41",
+     "name": "Curve",
+     "kind": "knob",
+     "value": "",
+     "box": [
+      667,
+      520,
+      50,
+      50
+     ],
+     "tip": "Below 1 jumps up early, above 1 builds slowly and shoots up at the end. (0.20x to 5.00x, default 1.60x)",
+     "n": 55
+    },
+    {
+     "sid": "riser_42",
+     "name": "Pitch up",
+     "kind": "knob",
+     "value": "",
+     "box": [
+      737,
+      520,
+      50,
+      50
+     ],
+     "tip": "How many semitones the riser lifts the pitch. (0.0 st to +60.0 st, default +24.0 st)",
+     "n": 56
+    },
+    {
+     "sid": "riser_43",
+     "name": "Grains",
+     "kind": "knob",
+     "value": "",
+     "box": [
+      807,
+      520,
+      50,
+      50
+     ],
+     "tip": "How far the grains shrink and speed up as the riser builds. (0% to 100%, default 70%)",
+     "n": 57
+    },
+    {
+     "sid": "riser_44",
+     "name": "Tone",
+     "kind": "knob",
+     "value": "",
+     "box": [
+      877,
+      520,
+      50,
+      50
+     ],
+     "tip": "Grains get so close they turn into a pitched tone at the Tone Hz (or the key you play). 0 stays granular. (0% to 100%, default 60%)",
+     "n": 58
+    },
+    {
+     "sid": "riser_45",
+     "name": "Tone Hz",
+     "kind": "knob",
+     "value": "",
+     "box": [
+      947,
+      520,
+      50,
+      50
+     ],
+     "tip": "Pitch the grains settle on at the top of the riser (FX mode). (40.0 Hz to 2.00 kHz, default 440 Hz)",
+     "n": 59
+    },
+    {
+     "sid": "riser_46",
+     "name": "Filter up",
+     "kind": "knob",
+     "value": "",
+     "box": [
+      1017,
+      520,
+      50,
+      50
+     ],
+     "tip": "Opens the filter by this many octaves while the riser builds. (0.0 oct to 6.0 oct, default 2.0 oct)",
+     "n": 60
+    }
+   ],
+   "box": [
+    578,
+    425,
+    534,
+    330
+   ],
+   "img": "hairball_p9.png"
+  },
+  {
+   "title": "Thicken",
+   "wide": false,
+   "disp": null,
+   "disps": [],
+   "tab": "thicken",
+   "items": [
+    {
+     "sid": "thicken_27",
+     "name": "Width",
+     "kind": "knob",
+     "value": "",
+     "box": [
+      150,
+      468,
+      50,
+      50
+     ],
+     "tip": "Mid/side width. 100 is unchanged, 0 is mono, 200 is double the side signal. (0% to 200%, default 100%)",
+     "n": 61
+    },
+    {
+     "sid": "thicken_28",
+     "name": "Bass mono",
+     "kind": "knob",
+     "value": "",
+     "box": [
+      226.890625,
+      468,
+      50,
+      50
+     ],
+     "tip": "Keeps everything below this frequency in the middle. 0 is off. (0.0 Hz to 400 Hz, default 0.0 Hz)",
+     "n": 62
+    },
+    {
+     "sid": "thicken_29",
+     "name": "Low",
+     "kind": "knob",
+     "value": "",
+     "box": [
+      302,
+      468,
+      50,
+      50
+     ],
+     "tip": "Low shelf at 120 Hz. (-18.0 dB to +18.0 dB, default 0.0 dB)",
+     "n": 63
+    },
+    {
+     "sid": "thicken_30",
+     "name": "Mid",
+     "kind": "knob",
+     "value": "",
+     "box": [
+      378,
+      468,
+      50,
+      50
+     ],
+     "tip": "Bell filter gain. (-18.0 dB to +18.0 dB, default 0.0 dB)",
+     "n": 64
+    },
+    {
+     "sid": "thicken_31",
+     "name": "Mid Hz",
+     "kind": "knob",
+     "value": "",
+     "box": [
+      454,
+      468,
+      50,
+      50
+     ],
+     "tip": "Bell filter frequency. (100 Hz to 8.00 kHz, default 1.00 kHz)",
+     "n": 65
+    },
+    {
+     "sid": "thicken_32",
+     "name": "Mid Q",
+     "kind": "knob",
+     "value": "",
+     "box": [
+      530,
+      468,
+      50,
+      50
+     ],
+     "tip": "Bell filter width. Higher is narrower. (0.30 to 8.00, default 1.00)",
+     "n": 66
+    },
+    {
+     "sid": "thicken_33",
+     "name": "High",
+     "kind": "knob",
+     "value": "",
+     "box": [
+      606,
+      468,
+      50,
+      50
+     ],
+     "tip": "High shelf at 8 kHz. (-18.0 dB to +18.0 dB, default 0.0 dB)",
+     "n": 67
+    }
+   ],
+   "box": [
+    128,
+    425,
+    569.828125,
+    173
+   ],
+   "img": "hairball_p10.png"
+  },
+  {
+   "title": "Filter",
+   "wide": false,
+   "disp": null,
+   "disps": [],
+   "tab": "thicken",
+   "items": [
+    {
+     "sid": "thicken_34",
+     "name": "Filter",
+     "kind": "choice",
+     "value": "",
+     "box": [
+      718.828125,
+      471,
+      382.171875,
+      28
+     ],
+     "tip": "Off, Low pass, High pass or Band pass. (Off / LP / HP / BP)",
+     "n": 68
+    },
+    {
+     "sid": "thicken_35",
+     "name": "Cutoff",
+     "kind": "knob",
+     "value": "",
+     "box": [
+      729.828125,
+      520,
+      50,
+      50
+     ],
+     "tip": "Filter cutoff. The riser can open it by itself. (20.0 Hz to 20.00 kHz, default 12.00 kHz)",
+     "n": 69
+    },
+    {
+     "sid": "thicken_36",
+     "name": "Reso",
+     "kind": "knob",
+     "value": "",
+     "box": [
+      805.828125,
+      520,
+      50,
+      50
+     ],
+     "tip": "Filter resonance. (0.50 to 12.00, default 0.70)",
+     "n": 70
+    }
+   ],
+   "box": [
+    707.828125,
+    425,
+    404.171875,
+    173
+   ],
+   "img": "hairball_p11.png"
+  },
+  {
+   "title": "Response",
+   "wide": false,
+   "disp": {
+    "id": "resp",
+    "box": [
+     139,
+     640,
+     299.328125,
+     104
+    ],
+    "letter": "H"
+   },
+   "disps": [
+    {
+     "id": "resp",
+     "box": [
+      139,
+      640,
+      299.328125,
+      104
+     ],
+     "letter": "H"
+    }
+   ],
+   "tab": "thicken",
+   "items": [],
+   "box": [
+    128,
+    608,
+    321.328125,
+    147
+   ],
+   "img": "hairball_p12.png"
+  },
+  {
+   "title": "Colour",
+   "wide": false,
+   "disp": {
+    "id": "xfer",
+    "box": [
+     748.5,
+     638,
+     104,
+     104
+    ],
+    "letter": "I"
+   },
+   "disps": [
+    {
+     "id": "xfer",
+     "box": [
+      748.5,
+      638,
+      104,
+      104
+     ],
+     "letter": "I"
+    }
+   ],
+   "tab": "thicken",
+   "items": [
+    {
+     "sid": "thicken_37",
+     "name": "Drive",
+     "kind": "knob",
+     "value": "",
+     "box": [
+      481.328125,
+      651,
+      50,
+      50
+     ],
+     "tip": "Symmetric analog clip. Odd harmonics, loud and bright. Above 100 percent needs Nasty range. (0% to 200%, default 0%)",
+     "n": 71
+    },
+    {
+     "sid": "thicken_38",
+     "name": "Transistor",
+     "kind": "knob",
+     "value": "",
+     "box": [
+      560.578125,
+      651,
+      50,
+      50
+     ],
+     "tip": "Neve style asymmetric stage. Even harmonics, warm and thick. Above 100 percent needs Nasty range. (0% to 200%, default 0%)",
+     "n": 72
+    },
+    {
+     "sid": "thicken_39",
+     "name": "Fuzz",
+     "kind": "knob",
+     "value": "",
+     "box": [
+      633.328125,
+      651,
+      50,
+      50
+     ],
+     "tip": "Lopsided hard fuzz. Above 80 percent it turns nasty on purpose. Above 100 percent needs Nasty range. (0% to 200%, default 0%)",
+     "n": 73
+    }
+   ],
+   "box": [
+    459.328125,
+    608,
+    404.171875,
+    147
+   ],
+   "img": "hairball_p13.png"
+  },
+  {
+   "title": "Dance",
+   "wide": false,
+   "disp": {
+    "id": "gr",
+    "box": [
+     1001,
+     638,
+     100,
+     104
+    ],
+    "letter": "J"
+   },
+   "disps": [
+    {
+     "id": "gr",
+     "box": [
+      1001,
+      638,
+      100,
+      104
+     ],
+     "letter": "J"
+    }
+   ],
+   "tab": "thicken",
+   "items": [
+    {
+     "sid": "thicken_40",
+     "name": "Dance",
+     "kind": "knob",
+     "value": "",
+     "box": [
+      895.5,
+      651,
+      50,
+      50
+     ],
+     "tip": "Glue compressor on everything above 150 Hz, bass left alone. Pumps and holds the sound together for dance music. (0% to 100%, default 0%)",
+     "n": 74
+    }
+   ],
+   "box": [
+    873.5,
+    608,
+    238.5,
+    147
+   ],
+   "img": "hairball_p14.png"
+  }
+ ],
+ "fulls": [
+  {
+   "tab": "grains",
+   "label": "Grains page",
+   "img": "hairball_full_grains.png"
+  },
+  {
+   "tab": "riser",
+   "label": "Riser page",
+   "img": "hairball_full_riser.png"
+  },
+  {
+   "tab": "thicken",
+   "label": "Thicken page",
+   "img": "hairball_full_thicken.png"
+  }
+ ]
+}

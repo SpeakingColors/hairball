@@ -1,0 +1,40 @@
+# Core tests, then loads both built VST3 plugins (Hairball and Hairball FX) in pluginval (the same kind of stress test a DAW's
+# scanner and host do): state save and load, automation, resizing, threading. Runs on pushes to main and by hand.
+name: pluginval
+on:
+  push:
+    branches: [main]
+    paths: ['src/**', 'tests/**', 'CMakeLists.txt', '.github/workflows/pluginval.yml']
+  workflow_dispatch:
+jobs:
+  validate:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - name: Core tests
+        run: sh tests/run.sh
+      - name: Build the VST3 plugins
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libasound2-dev libx11-dev libxinerama-dev libxext-dev libxrandr-dev libxcursor-dev libxcomposite-dev libfreetype-dev libfontconfig1-dev libgl1-mesa-dev xvfb unzip
+          cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
+          cmake --build build --parallel 4
+      - name: Run pluginval
+        shell: bash
+        run: |
+          curl -fsSL -o pv.zip https://github.com/Tracktion/pluginval/releases/latest/download/pluginval_Linux.zip
+          unzip -q pv.zip; chmod +x pluginval
+          rc=0
+          find build -type d -name "*.vst3" -print0 | while IFS= read -r -d '' v; do
+            echo "=== Testing $v"
+            set +e
+            xvfb-run -a ./pluginval --strictness-level 10 --validate-in-process --skip-gui-tests false --timeout-ms 120000 --verbose "$v" 2>&1 | tee -a pv.log
+            code=${PIPESTATUS[0]}
+            echo "pluginval exit code: $code for $v" | tee -a pv.log
+            [ "$code" -eq 0 ] || echo 1 > rc.flag
+          done
+          (grep -iE "fail|error|assert|crash|exit code" pv.log | head -n 12; tail -n 6 pv.log) | while IFS= read -r l; do echo "::notice::${l:0:300}"; done
+          [ ! -f rc.flag ]
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with: { name: pluginval-log, path: pv.log }
