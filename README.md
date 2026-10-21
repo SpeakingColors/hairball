@@ -10,6 +10,8 @@ Works two ways:
 
 **Manual:** [PDF with interface tour, opens in the browser](https://github.com/SpeakingColors/hairball/blob/main/docs/Hairball-manual.pdf)
 
+<p align="center"><img src="docs/screenshot.png" alt="Hairball editor" width="900"><br><sub>Screenshot of the interactive mockup in docs/mockups.</sub></p>
+
 ## Status
 Version 0.1.0 (test build): two VST3 plugins (Hairball, instrument; Hairball FX, effect) and a standalone app, from the same pure C++ engine (280 passing checks), with the real window built from the mockup, 11 factory presets, installers, and a PDF manual with an interface tour. Not tuned by ear and not tested in a real DAW yet. See [ROADMAP](ROADMAP.md).
 
