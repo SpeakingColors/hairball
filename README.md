@@ -8,6 +8,8 @@ Works two ways:
 - **Instrument**: drop an audio file, play it with MIDI, automate everything.
 - **FX**: sits on a track, listens to what plays, and freezes, holds or rebuilds it live. Capture the frozen buffer into the plugin as a small sample.
 
+**Manual:** [PDF with interface tour, opens in the browser](https://github.com/SpeakingColors/hairball/blob/main/docs/Hairball-manual.pdf)
+
 ## Status
 Version 0.1.0 (test build): two VST3 plugins (Hairball, instrument; Hairball FX, effect) and a standalone app, from the same pure C++ engine (280 passing checks), with the real window built from the mockup, 11 factory presets, installers, and a PDF manual with an interface tour. Not tuned by ear and not tested in a real DAW yet. See [ROADMAP](ROADMAP.md).
 
