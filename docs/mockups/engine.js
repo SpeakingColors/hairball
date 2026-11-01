@@ -34,6 +34,23 @@ function shaper(x, drive, xs, fuzz) {
     if (fn > 0) { const r = Math.sqrt(y * y + .02) - .1414; y += fn * .7 * (r - .3); y = Math.tanh(y * (1 + .8 * fn)); } }
   return y;
 }
+// 4x oversampling for the Colour stages (same polyphase allpass half-band filters as the C++ core, no latency)
+class HbAp { constructor() { this.a = 0; this.x1 = 0; this.y1 = 0; } tick(x) { const y = this.a * (x - this.y1) + this.x1; this.x1 = x; this.y1 = y; return y; } }
+class HbHalf {
+  constructor(c) { this.ap = c.map(a => { const f = new HbAp(); f.a = a; return f; }); this.prevOdd = 0; }
+  up(x) { let a = x, b = x; for (let i = 0; i < this.ap.length; ++i) { if ((i & 1) === 0) a = this.ap[i].tick(a); else b = this.ap[i].tick(b); } return [a, b]; }
+  down(xe, xo) { let a = xe, b = this.prevOdd; for (let i = 0; i < this.ap.length; ++i) { if ((i & 1) === 0) a = this.ap[i].tick(a); else b = this.ap[i].tick(b); } this.prevOdd = xo; return 0.5 * (a + b); }
+}
+const HB1 = [0.031727, 0.120683, 0.251108, 0.404553, 0.566765, 0.732056, 0.905389], HB2 = [0.062742, 0.2638, 0.665913];
+class Oversampler4 {
+  constructor() { this.reset(); }
+  reset() { this.up1 = new HbHalf(HB1); this.dn1 = new HbHalf(HB1); this.up2 = new HbHalf(HB2); this.dn2 = new HbHalf(HB2); }
+  run(x, fn) {
+    const [e, o] = this.up1.up(x), [p0, p1] = this.up2.up(e), [p2, p3] = this.up2.up(o);
+    const h0 = this.dn2.down(fn(p0), fn(p1)), h1 = this.dn2.down(fn(p2), fn(p3));
+    return this.dn1.down(h0, h1);
+  }
+}
 function makeup(d, x, f) { let a = 0, b = 0; for (let i = 0; i < 64; ++i) { const s = .35 * Math.sin(6.2831853 * i / 64), y = shaper(s, d, x, f); a += s * s; b += y * y; } return b > 1e-9 ? clamp(Math.sqrt(a / b), .25, 4) : 1; }
 const softLim = x => { const ax = Math.abs(x); if (ax <= .9) return x; const y = .9 + .1 * Math.tanh((ax - .9) * 10); return x < 0 ? -y : y; };
 
@@ -51,7 +68,7 @@ class HairballEngine {
     this.voices = []; for (let i = 0; i < KVOICES; ++i) this.voices.push(newVoice());
     this.liveW = 0; this.frozen = false; this.ringN = Math.floor(4 * sr); this.detected = []; this.regions = [];
     this.lowSh = [new Biquad(), new Biquad()]; this.midBq = [new Biquad(), new Biquad()]; this.highSh = [new Biquad(), new Biquad()]; this.filt = [new Svf(), new Svf()];
-    this.lowState = [0, 0]; this.sideLp = 0; this.dcX = [0, 0]; this.dcY = [0, 0];
+    this.lowState = [0, 0]; this.sideLp = 0; this.dcX = [0, 0]; this.dcY = [0, 0]; this.os = [new Oversampler4(), new Oversampler4()];
     this.sm = {}; this.smInit = false; this.c = { low: 1e9, mid: 1e9, midF: 1e9, midQ: 1e9, high: 1e9, cut: 1e9, res: 1e9 }; this.mk = 1; this.mkD = -1; this.mkX = -1; this.mkF = -1;
     this.danceEnv = 0; this.gl = new Float32Array(KCHUNK); this.grr = new Float32Array(KCHUNK);
     this.stats = { grains: 0, rise: 0, head: 0 }; this.lastGr = 0;
@@ -228,8 +245,8 @@ class HairballEngine {
     if (S.drive > .001 || S.x > .001 || S.fuzz > .001) {
       if (Math.abs(S.drive - this.mkD) > .01 || Math.abs(S.x - this.mkX) > .01 || Math.abs(S.fuzz - this.mkF) > .01) { this.mkD = S.drive; this.mkX = S.x; this.mkF = S.fuzz; this.mk = makeup(this.mkD, this.mkX, this.mkF); }
       const arr = [gl, gr];
-      for (let i = 0; i < c; ++i) for (let k = 0; k < 2; ++k) { const y = shaper(arr[k][i], S.drive, S.x, S.fuzz) * this.mk, o = y - this.dcX[k] + .9995 * this.dcY[k]; this.dcX[k] = y; this.dcY[k] = o; arr[k][i] = o; }
-    }
+      for (let i = 0; i < c; ++i) for (let k = 0; k < 2; ++k) { const y = this.os[k].run(arr[k][i], v => shaper(v, S.drive, S.x, S.fuzz)) * this.mk, o = y - this.dcX[k] + .9995 * this.dcY[k]; this.dcX[k] = y; this.dcY[k] = o; arr[k][i] = o; }
+    } else { this.os[0].reset(); this.os[1].reset(); }
     if (S.dance > .002) {
       const lpA = 1 - Math.exp(-2 * PI * 150 / sr), thr = -6 - 24 * S.dance, ratio = 2 + 4 * S.dance, mkDb = -thr * (1 - 1 / ratio) * .35;
       const atk = 1 - Math.exp(-1 / (.002 * sr)), rel = 1 - Math.exp(-1 / (.08 * sr)), ls = this.lowState;

@@ -261,9 +261,48 @@ static void testPluginHooks()
     float heads[8]; CHECK (f.e.voiceHeads (heads, 8) == 1, "FX mode shows one read position");
 }
 
+// Colour stages run at 4x oversampling with zero-latency half-band filters: flat passband, and far less aliasing than the plain shaper.
+static double aliasVsHarmonicsDb (bool oversampled, float d, float x, float f)
+{
+    const int N = 8192, kf = 157; const double f0 = kf * SR / N;
+    hb::Oversampler4 os; Vec y (N);
+    for (int i = 0; i < N + 6000; ++i)
+    {
+        const float in = 0.35f * (float) std::sin (2 * 3.14159265358979 * f0 * i / SR);
+        const float out = oversampled ? os.run (in, [&] (float v) { return hb::Colour::shaper (v, d, x, f); }) : hb::Colour::shaper (in, d, x, f);
+        if (i >= 6000) y[(size_t) (i - 6000)] = out;
+    }
+    double harm = 0, other = 0;
+    for (int b = 5; b < N / 2; ++b)
+    {
+        double re = 0, im = 0;
+        for (int i = 0; i < N; ++i) { const double w = 0.5 - 0.5 * std::cos (2 * 3.14159265358979 * i / N), a = 2 * 3.14159265358979 * b * i / N; re += y[(size_t) i] * w * std::cos (a); im -= y[(size_t) i] * w * std::sin (a); }
+        bool isH = false; for (int dd = -3; dd <= 3; ++dd) { const int bb = b + dd; if (bb > 0 && bb % kf == 0) { isH = true; break; } }
+        (isH ? harm : other) += re * re + im * im;
+    }
+    return 10 * std::log10 ((other + 1e-30) / (harm + 1e-30));
+}
+static void testColourOversampling()
+{
+    for (double fr : { 100.0, 1000.0, 8000.0, 16000.0, 20000.0 })
+    {
+        hb::Oversampler4 os; double a = 0, b = 0; const double w = 2 * 3.14159265358979 * fr / SR;
+        for (int i = 0; i < 24000; ++i) { const float x = (float) std::sin (w * i); const float y = os.run (x, [] (float v) { return v; }); if (i > 4000) { a += (double) y * y; b += (double) x * x; } }
+        const double g = 10 * std::log10 (a / b);
+        CHECK (std::fabs (g) < 0.1, "oversampler gain at %.0f Hz is %.3f dB", fr, g);
+    }
+    struct Case { const char* n; float d, x, f; } cs[] = { { "Drive 100", 1, 0, 0 }, { "Transistor 100", 0, 1, 0 }, { "Fuzz 100", 0, 0, 1 } };
+    for (auto& c : cs)
+    {
+        const double a1 = aliasVsHarmonicsDb (false, c.d, c.x, c.f), a4 = aliasVsHarmonicsDb (true, c.d, c.x, c.f);
+        CHECK (a4 < a1 - 15.0 && a4 < -33.0, "%s: aliasing %.1f dB plain, %.1f dB oversampled", c.n, a1, a4);
+        std::printf ("colour aliasing %s: %.1f dB plain, %.1f dB oversampled 4x\n", c.n, a1, a4);
+    }
+}
+
 int main()
 {
-    testParams(); testIdentity(); testPitchAndSpeed(); testFreezeReverseSpacing(); testRiserTone(); testLiveFreeze(); testTransients(); testChain(); testSafety(); testResponsiveness(); testSpeed(); testPluginHooks();
+    testParams(); testIdentity(); testPitchAndSpeed(); testFreezeReverseSpacing(); testRiserTone(); testLiveFreeze(); testTransients(); testChain(); testSafety(); testResponsiveness(); testSpeed(); testPluginHooks(); testColourOversampling();
     std::printf ("%d checks, %d failed\n", checks, fails);
     return fails ? 1 : 0;
 }

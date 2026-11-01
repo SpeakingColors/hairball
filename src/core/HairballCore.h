@@ -124,6 +124,50 @@ struct Colour
     }
 };
 
+// 4x oversampling for the Colour stages: two cascaded polyphase allpass half-band filters (no latency, no allocation).
+// Stage 1 (1x to 2x): 7 coefficients, about 100 dB image rejection, flat to 20 kHz at 48 kHz. Stage 2 (2x to 4x): 3 coefficients, about 94 dB.
+// The coefficients were fitted for the polyphase structure H(z) = 0.5 (A0(z^2) + z^-1 A1(z^2)); the test checks gain, flatness and alias level.
+struct HbAllpass
+{
+    double a = 0, x1 = 0, y1 = 0;
+    inline double tick (double x) { const double y = a * (x - y1) + x1; x1 = x; y1 = y; return y; }
+    void reset() { x1 = y1 = 0; }
+};
+template <int N>
+struct HbHalf
+{
+    HbAllpass ap[N]; double prevOdd = 0;
+    void set (const double* c) { for (int i = 0; i < N; ++i) ap[i].a = c[i]; }
+    void reset() { for (auto& f : ap) f.reset(); prevOdd = 0; }
+    // one low-rate sample in, two high-rate samples out (even, odd)
+    inline void up (double x, double& e, double& o)
+    { double a = x, b = x; for (int i = 0; i < N; ++i) { if ((i & 1) == 0) a = ap[i].tick (a); else b = ap[i].tick (b); } e = a; o = b; }
+    // two high-rate samples in (even, odd), one low-rate sample out
+    inline double down (double xe, double xo)
+    { double a = xe, b = prevOdd; for (int i = 0; i < N; ++i) { if ((i & 1) == 0) a = ap[i].tick (a); else b = ap[i].tick (b); } prevOdd = xo; return 0.5 * (a + b); }
+};
+struct Oversampler4
+{
+    HbHalf<7> up1, dn1; HbHalf<3> up2, dn2;
+    Oversampler4()
+    {
+        static const double c1[7] = { 0.031727, 0.120683, 0.251108, 0.404553, 0.566765, 0.732056, 0.905389 };
+        static const double c2[3] = { 0.062742, 0.2638, 0.665913 };
+        up1.set (c1); dn1.set (c1); up2.set (c2); dn2.set (c2);
+    }
+    void reset() { up1.reset(); dn1.reset(); up2.reset(); dn2.reset(); }
+    // Runs fn (float to float) at 4x the sample rate. fn must be memoryless or keep its own state for the 4x rate.
+    template <class F> inline float run (float x, F&& fn)
+    {
+        double e, o, p0, p1, p2, p3;
+        up1.up ((double) x, e, o);                       // 2x samples e, o
+        up2.up (e, p0, p1); up2.up (o, p2, p3);           // 4x samples p0..p3, in time order through one filter
+        p0 = fn ((float) p0); p1 = fn ((float) p1); p2 = fn ((float) p2); p3 = fn ((float) p3);
+        const double h0 = dn2.down (p0, p1), h1 = dn2.down (p2, p3);
+        return (float) dn1.down (h0, h1);
+    }
+};
+
 // ---------- the engine ----------
 class Engine
 {
@@ -147,7 +191,7 @@ public:
     void reset()
     {
         for (auto& v : voices) v = Voice();
-        liveW = 0; frozen = false; ringN = (size_t) (4.0 * sr); lowState[0] = lowState[1] = 0; dcX[0] = dcX[1] = dcY[0] = dcY[1] = 0;
+        liveW = 0; frozen = false; ringN = (size_t) (4.0 * sr); lowState[0] = lowState[1] = 0; dcX[0] = dcX[1] = dcY[0] = dcY[1] = 0; os[0].reset(); os[1].reset();
         for (int c = 0; c < 2; ++c) { lowSh[c].reset(); midBq[c].reset(); highSh[c].reset(); filt[c].reset(); sideLp = 0; }
         coefsValid = false; smInit = false; danceEnv = 0; danceGain = 1.0f; lastGr = 0.0f;
     }
@@ -305,7 +349,7 @@ private:
     Rng rng;
 
     // chain state
-    Biquad lowSh[2], midBq[2], highSh[2]; Svf filt[2]; float lowState[2] = { 0, 0 }, sideLp = 0, dcX[2] = { 0, 0 }, dcY[2] = { 0, 0 };
+    Oversampler4 os[2]; Biquad lowSh[2], midBq[2], highSh[2]; Svf filt[2]; float lowState[2] = { 0, 0 }, sideLp = 0, dcX[2] = { 0, 0 }, dcY[2] = { 0, 0 };
     float smMix = 1, smOut = 1, smWidth = 1, smBassMono = 0, smLow = 0, smMid = 0, smMidF = 1000, smHigh = 0, smCut = 12000, smReso = 0.7f, smDrive = 0, smX = 0, smFuzz = 0, smDance = 0;
     bool smInit = false, coefsValid = false; float cLow = 1e9f, cMid = 1e9f, cMidF = 1e9f, cMidQ = 1e9f, cHigh = 1e9f, cCut = 1e9f, cRes = 1e9f, mk = 1.0f, mkD = -1, mkX = -1, mkF = -1;
     float danceEnv = 0, danceGain = 1.0f, lastGr = 0.0f;
@@ -576,11 +620,12 @@ private:
                 float* ch[2] = { &gl[i], &gr[i] };
                 for (int k = 0; k < 2; ++k)
                 {
-                    const float y = Colour::shaper (*ch[k], smDrive, smX, smFuzz) * mk;
+                    const float dD = smDrive, dX = smX, dF = smFuzz;
+                    const float y = os[k].run (*ch[k], [dD, dX, dF] (float v) { return Colour::shaper (v, dD, dX, dF); }) * mk;   // 4x oversampled, no latency
                     const float o = y - dcX[k] + 0.9995f * dcY[k]; dcX[k] = y; dcY[k] = o; *ch[k] = o;   // removes the offset the asymmetric stages add
                 }
             }
-        }
+        }        else { os[0].reset(); os[1].reset(); }
         // Dance glue: compress everything above 150 Hz, leave the bass alone
         if (smDance > 0.002f)
         {
