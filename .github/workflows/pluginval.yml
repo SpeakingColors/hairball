@@ -6,11 +6,14 @@ on:
     branches: [main]
     paths: ['src/**', 'tests/**', 'CMakeLists.txt', '.github/workflows/pluginval.yml']
   workflow_dispatch:
+permissions:
+  contents: read
+
 jobs:
   validate:
     runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
       - name: Core tests
         run: sh tests/run.sh
       - name: Build the VST3 plugins
@@ -35,6 +38,6 @@ jobs:
           done
           (grep -iE "fail|error|assert|crash|exit code" pv.log | head -n 12; tail -n 6 pv.log) | while IFS= read -r l; do echo "::notice::${l:0:300}"; done
           [ ! -f rc.flag ]
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         if: always()
         with: { name: pluginval-log, path: pv.log }
