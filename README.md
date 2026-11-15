@@ -2,6 +2,8 @@
 
 # Hairball
 
+<p align="center"><a href="https://ko-fi.com/studio87"><img src="https://raw.githubusercontent.com/SpeakingColors/.github/main/assets/kofi-banner.svg" alt="Support Studio 87 on Ko-fi" width="440"></a></p>
+
 Freeze it, shred it, turn it into something else. A free grain-based audio transformer for dance, house, UK hardcore and hardstyle, with Linux first.
 
 Works two ways:
