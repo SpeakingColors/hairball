@@ -1,0 +1,65 @@
+[
+  {
+    "before": "hairball-before-drums.mp3",
+    "after": "hairball-after-drums-freeze-pad.mp3",
+    "preset": "Freeze Pad",
+    "source": "Drum loop",
+    "description": "Drum loop through the real Hairball C++ engine in FX mode with the factory preset Freeze Pad (FX). Freeze switches on after the first bar. The After clip is level matched to the Before clip (+6.6 dB)."
+  },
+  {
+    "before": "hairball-before-chords.mp3",
+    "after": "hairball-after-chords-freeze-pad.mp3",
+    "preset": "Freeze Pad",
+    "source": "Synth chord loop",
+    "description": "Synth chord loop through the real Hairball C++ engine in FX mode with the factory preset Freeze Pad (FX). Freeze switches on after the first bar. The After clip is level matched to the Before clip (+5.0 dB)."
+  },
+  {
+    "before": "hairball-before-lead.mp3",
+    "after": "hairball-after-lead-freeze-pad.mp3",
+    "preset": "Freeze Pad",
+    "source": "Vocal-like lead",
+    "description": "Vocal-like lead through the real Hairball C++ engine in FX mode with the factory preset Freeze Pad (FX). Freeze switches on after the first bar. The After clip is level matched to the Before clip (+7.2 dB)."
+  },
+  {
+    "before": "hairball-before-drums.mp3",
+    "after": "hairball-after-drums-cloud-wash.mp3",
+    "preset": "Cloud Wash",
+    "source": "Drum loop",
+    "description": "Drum loop through the real Hairball C++ engine in FX mode with the factory preset Cloud Wash (Grains). The After clip is level matched to the Before clip (+1.3 dB)."
+  },
+  {
+    "before": "hairball-before-chords.mp3",
+    "after": "hairball-after-chords-cloud-wash.mp3",
+    "preset": "Cloud Wash",
+    "source": "Synth chord loop",
+    "description": "Synth chord loop through the real Hairball C++ engine in FX mode with the factory preset Cloud Wash (Grains). The After clip is level matched to the Before clip (+2.2 dB)."
+  },
+  {
+    "before": "hairball-before-lead.mp3",
+    "after": "hairball-after-lead-cloud-wash.mp3",
+    "preset": "Cloud Wash",
+    "source": "Vocal-like lead",
+    "description": "Vocal-like lead through the real Hairball C++ engine in FX mode with the factory preset Cloud Wash (Grains). The After clip is level matched to the Before clip (+3.1 dB)."
+  },
+  {
+    "before": "hairball-before-drums.mp3",
+    "after": "hairball-after-drums-telephone-wobble.mp3",
+    "preset": "Telephone Wobble",
+    "source": "Drum loop",
+    "description": "Drum loop through the real Hairball C++ engine in FX mode with the factory preset Telephone Wobble (FX). The After clip is level matched to the Before clip (+7.9 dB)."
+  },
+  {
+    "before": "hairball-before-chords.mp3",
+    "after": "hairball-after-chords-telephone-wobble.mp3",
+    "preset": "Telephone Wobble",
+    "source": "Synth chord loop",
+    "description": "Synth chord loop through the real Hairball C++ engine in FX mode with the factory preset Telephone Wobble (FX). The After clip is level matched to the Before clip (-5.1 dB)."
+  },
+  {
+    "before": "hairball-before-lead.mp3",
+    "after": "hairball-after-lead-telephone-wobble.mp3",
+    "preset": "Telephone Wobble",
+    "source": "Vocal-like lead",
+    "description": "Vocal-like lead through the real Hairball C++ engine in FX mode with the factory preset Telephone Wobble (FX). The After clip is level matched to the Before clip (-4.4 dB)."
+  }
+]
