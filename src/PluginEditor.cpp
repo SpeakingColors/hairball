@@ -473,8 +473,8 @@ void HairballEditor::showAbout()
         juce::String ("Hairball by Studio 87, version ") + JucePlugin_VersionString + ".\n\n"
         "Free and open source (AGPL-3.0-or-later). It collects nothing and makes no network calls. The button below only opens a link in your browser when you click it.\n\n"
         "Your saved sounds live in: " + HairballProcessor::userPresetDir().getFullPathName() + "\n\n"
-        "This is a test build: not yet tuned by ear.\n\n" + juce::String (studio87link::aboutLine())).withButton ("Support on Ko-fi").withButton (studio87link::buttonText()).withButton ("Close"),
-        [] (int pick) { if (pick == 1) juce::URL ("https://ko-fi.com/studio87").launchInDefaultBrowser(); else if (pick == 2) studio87link::openUpdater ("hairball"); });
+        "This is a test build: not yet tuned by ear.\n\n" + juce::String (studio87link::aboutLine())).withButton ("Support on Ko-fi").withButton (studio87link::buttonText()).withButton (studio87link::githubButtonText()).withButton ("Close"),
+        [] (int pick) { if (pick == 1) juce::URL ("https://ko-fi.com/studio87").launchInDefaultBrowser(); else if (pick == 2) studio87link::openUpdater ("hairball"); else if (pick == 3) studio87link::openGitHub ("hairball"); });
 }
 
 void HairballEditor::showSettings()
